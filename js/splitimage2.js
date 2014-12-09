@@ -24,7 +24,13 @@ var first = 1;
 leftsel.onchange = function() {
     set_left();
 };
+leftqual.onchange = function() {
+    set_left();
+};
 rightsel.onchange = function() {
+    set_right();
+};
+rightqual.onchange = function() {
     set_right();
 };
 filesel.onchange = function() {
@@ -79,9 +85,17 @@ function set_split() {
     }
 }
 
+function j2k_to_image(data) {
+    run();
+    _STDIO.prepare('image.j2k', data);
+    callMain(['-i', 'image.j2k', '-o', 'image.raw']);
+    return _STDIO.streams[_STDIO.filenames['image.raw']].data;
+}
+
 function set_image(container, name, codec) {
     container.style.background = "gray";
     container.style.backgroundImage = "";
+    var path = 'comparisonfiles/' + name + '/' + urlfile + codec;
 
     if (codec == '.bpg') {
         var canvas = document.createElement("canvas");
@@ -93,79 +107,142 @@ function set_image(container, name, codec) {
             ctx.putImageData(this.imageData, 0, 0);
             set_size(canvas.toDataURL(), canvas.width, canvas.height, container);
         };
-        image.load('comparisonfiles/' + name + '/' + urlfile + codec);
-    } else if (codec == '.webp') {
-
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", 'comparisonfiles/' + name + '/' + urlfile + codec, true);
-        xhr.responseType = "arraybuffer";
-
-        xhr.onload = function(event) {
-            var canvas = document.createElement("canvas");
-            var ctx = canvas.getContext("2d");
-
-            var response = xhr.response;
-            var data = new Uint8Array(response);
-            var decoder = new WebPDecoder();
-
-            var config = decoder.WebPDecoderConfig;
-            var output_buffer = config.output;
-            var bitstream = config.input;
-            var StatusCode = decoder.VP8StatusCode;
-
-            status = decoder.WebPGetFeatures(data, data.length, bitstream);
-
-            var mode = decoder.WEBP_CSP_MODE;
-            console.log(mode)
-            output_buffer.colorspace = mode.MODE_ARGB;
-
-            status = decoder.WebPDecode(data, data.length, config);
-            var bitmap = output_buffer.u.RGBA.rgba;
-
-            var biHeight = output_buffer.height;
-            var biWidth = output_buffer.width;
-
-            canvas.height = biHeight;
-            canvas.width = biWidth;
-            var output = ctx.createImageData(canvas.width, canvas.height);
-            var outputData = output.data;
-
-            for (var h = 0; h < biHeight; h++) {
-                for (var w = 0; w < biWidth; w++) {
-                    outputData[0 + w * 4 + (biWidth * 4) * h] = bitmap[1 + w * 4 + (biWidth * 4) * h];
-                    outputData[1 + w * 4 + (biWidth * 4) * h] = bitmap[2 + w * 4 + (biWidth * 4) * h];
-                    outputData[2 + w * 4 + (biWidth * 4) * h] = bitmap[3 + w * 4 + (biWidth * 4) * h];
-                    outputData[3 + w * 4 + (biWidth * 4) * h] = bitmap[0 + w * 4 + (biWidth * 4) * h];
-
-                };
-            }
-
-            ctx.putImageData(output, 0, 0);
-            set_size(canvas.toDataURL("image/png"), canvas.width, canvas.height, container);
-
-        };
-        xhr.send();
+        image.load(path);
     } else {
         var image = new Image();
         image.onload = function() {
             set_size(image.src, image.width, image.height, container)
         };
-        image.src = 'comparisonfiles/' + name + '/' + urlfile + codec;
+        image.onerror = function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", path, true);
+            xhr.responseType = "arraybuffer";
+
+            xhr.onload = function(event) {
+                var canvas = document.createElement("canvas");
+                var ctx = canvas.getContext("2d");
+
+                var response = xhr.response;
+                var data = new Uint8Array(response);
+
+                if (codec == '.webp') {
+                    var decoder = new WebPDecoder();
+
+                    var config = decoder.WebPDecoderConfig;
+                    var output_buffer = config.output;
+                    var bitstream = config.input;
+                    var StatusCode = decoder.VP8StatusCode;
+
+                    status = decoder.WebPGetFeatures(data, data.length, bitstream);
+
+                    var mode = decoder.WEBP_CSP_MODE;
+                    output_buffer.colorspace = mode.MODE_ARGB;
+
+                    status = decoder.WebPDecode(data, data.length, config);
+                    var bitmap = output_buffer.u.RGBA.rgba;
+
+                    var biWidth = output_buffer.width;
+                    var biHeight = output_buffer.height;
+
+                    canvas.width = biWidth;
+                    canvas.height = biHeight;
+                    var output = ctx.createImageData(canvas.width, canvas.height);
+                    var outputData = output.data;
+
+                    for (var h = 0; h < biHeight; h++) {
+                        for (var w = 0; w < biWidth; w++) {
+                            outputData[0 + w * 4 + (biWidth * 4) * h] = bitmap[1 + w * 4 + (biWidth * 4) * h];
+                            outputData[1 + w * 4 + (biWidth * 4) * h] = bitmap[2 + w * 4 + (biWidth * 4) * h];
+                            outputData[2 + w * 4 + (biWidth * 4) * h] = bitmap[3 + w * 4 + (biWidth * 4) * h];
+                            outputData[3 + w * 4 + (biWidth * 4) * h] = bitmap[0 + w * 4 + (biWidth * 4) * h];
+                        };
+                    };
+                    ctx.putImageData(output, 0, 0);
+                    set_size(canvas.toDataURL("image/png"), canvas.width, canvas.height, container);
+                } else if (codec == '.jp2') {
+                    var worker = new Worker('js/jp2kworker.js');
+                    worker.onmessage = function(event) {
+                        var bitmap = event.data;
+                        var pixelsPerChannel = bitmap.width * bitmap.height;
+                        //console.log(bitmap);
+
+                        canvas.width = bitmap.width;
+                        canvas.height = bitmap.height;
+                        var output = ctx.createImageData(canvas.width, canvas.height);
+
+                        var i = 0,
+                            j = 0;
+                        while (i < output.data.length && j < pixelsPerChannel) {
+                            output.data[i] = bitmap.data[j]; // R
+                            output.data[i + 1] = bitmap.data[j + pixelsPerChannel]; // G
+                            output.data[i + 2] = bitmap.data[j + (2 * pixelsPerChannel)]; // B
+                            output.data[i + 3] = 255; // A
+
+                            // Next pixel
+                            i += 4;
+                            j += 1;
+                        };
+                        ctx.putImageData(output, 0, 0);
+                        set_size(canvas.toDataURL("image/png"), canvas.width, canvas.height, container);
+                    };
+                    worker.postMessage({
+                        bytes: data,
+                        extension: 'jp2'
+                    });
+                };
+            };
+            xhr.send();
+        };
+        image.src = path;
+    }
+}
+
+function get_size(name, codec) {
+    var path = 'comparisonfiles/' + name + '/' + urlfile + codec;
+    var obj = new XMLHttpRequest();
+    obj.open('HEAD', path, false);
+    obj.send();
+    var size = obj.getResponseHeader('Content-Length');
+
+    if (!size) {
+        return name;
+    } else {
+        return (size / 1024).toFixed(1) + " KB";
     }
 }
 
 function set_left() {
+    var quality;
     var image = leftsel.options[leftsel.selectedIndex].getAttribute("value");
     var name = leftsel.options[leftsel.selectedIndex].innerHTML;
-    set_image(left, name, image);
+
+    if (name == 'Original') {
+        quality = '';
+    } else {
+        quality = leftqual.options[leftqual.selectedIndex].innerHTML.toLowerCase() + '/';
+    }
+    name = quality + name;
+
+    set_image(left, name, image, quality);
+    name = get_size(name, image);
     lefttext.innerHTML = name + "&nbsp;&larr;";
     textheight = lefttext.offsetHeight;
 }
 
 function set_right() {
+    var quality;
     var image = rightsel.options[rightsel.selectedIndex].getAttribute("value");
-    var name = rightsel.options[rightsel.selectedIndex].innerHTML
-    set_image(right, name, image);
+    var name = rightsel.options[rightsel.selectedIndex].innerHTML;
+
+    if (name == 'Original') {
+        quality = '';
+    } else {
+        quality = rightqual.options[rightqual.selectedIndex].innerHTML.toLowerCase() + '/';
+    }
+    name = quality + name;
+
+    set_image(right, name, image, quality);
+    name = get_size(name, image);
     righttext.innerHTML = "&rarr;&nbsp;" + name;
 }
 

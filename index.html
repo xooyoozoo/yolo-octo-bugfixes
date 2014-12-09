@@ -5,8 +5,39 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" title="default demosheet" media="screen" href="demo.css" type="text/css" />
     <title>____</title>
-    <script type="text/javascript" src="js/libwebp-0.1.3.min.js"></script>
     <script type="text/javascript" src="js/bpgdec.js"></script>
+    <!-- <script>
+    (function() {
+        var jp2k = new Image();
+        jp2k.onerror = jp2k.load = function() {
+            if (!jp2k.width || jp2k.width === 0) {
+                var sc = document.createElement('script');
+                sc.type = 'text/javascript';
+                sc.async = true;
+                var s = document.getElementsByTagName('script')[0];
+                sc.src = 'js/openjpeg.js';
+                s.parentNode.insertBefore(sc, s.nextSibling);
+            }
+        };
+        jp2k.src = 'data:image/jp2;base64,AAAADGpQICANCocKAAAAFGZ0eXBqcDIgAAAAAGpwMiAAAAAtanAyaAAAABZpaGRyAAAABAAAAAQAAw8HAAAAAAAPY29scgEAAAAAABAAAABpanAyY/9P/1EALwAAAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAEAAAAAAAAAAAAAw8BAQ8BAQ8BAf9SAAwAAAABAQAEBAAB/1wABECA/5AACgAAAAAAGAAB/5PP/BAQFABcr4CA/9k=';
+    })();
+    </script> -->
+    <script>
+    (function() {
+        var WebP = new Image();
+        WebP.onload = WebP.onerror = function() {
+            if (WebP.height != 2) {
+                var sc = document.createElement('script');
+                sc.type = 'text/javascript';
+                sc.async = true;
+                var s = document.getElementsByTagName('script')[0];
+                sc.src = 'js/webpjs-0.0.2.min.js';
+                s.parentNode.insertBefore(sc, s.nextSibling);
+            }
+        };
+        WebP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
+    })();
+    </script>
 </head>
 
 <body style="max-width: 100%;">
@@ -45,7 +76,7 @@
                         <option value="Krøyer_PS">Krøyer</option>
                         <option value="Lufthansa_Aviation_Center_after_sunset_-_Frankfurt_-_Germany_-_near_Airport_Frankfurt_-_Fraport_-_03">Lufthansa</option>
                         <option value="MEG_20110701_Japan_Expo_02">MEG</option>
-                        <option value="Moscow_July_2011-4a">Moscow</option>
+                        <option value="Moscow_July_2011-4a" selected>Moscow</option>
                         <option value="Mrio_sdp1">Mrio</option>
                         <option value="Mural_in_Northeast_Pavillion,_Thomas_Jefferson_Building_by_Elmer_E._Garnsey_11670u_edit">Mural</option>
                         <option value="Nestor_meridionalis_-Rotorua,_North_Island,_New_Zealand-8a">Nestor</option>
@@ -58,7 +89,7 @@
                         <option value="Sking">Sking</option>
                         <option value="Southern_pacific_1215">Southern Pacific</option>
                         <option value="Steinway_Vienna_panoramic">Steinway</option>
-                        <option value="Swallowtail_05_06_07" selected>Swallowtail</option>
+                        <option value="Swallowtail_05_06_07">Swallowtail</option>
                         <option value="US_Navy_091029-M-5645B-091_A_landing_craft,_air_cushion_(LCAC)_and_the_U.S._Coast_Guard_patrol_boat_Albacore_are_underway_near_Naval_Station_Norfolk">Hovercraft (no eels)</option>
                         <option value="US_Navy_111117-N-UB993-082_A_Sailor_examines_a_patient_during_drill">Medic</option>
                         <option value="US_Open_Tennis_2010_1st_Round_046">Tennis</option>
@@ -78,9 +109,14 @@
                         <option value=".webp">WebP</option>
                         <option value=".png">Original</option>
                     </select>
+                    <select id="leftqual" style="font-size: 1.1em;">
+                        <option>Medium</option>
+                        <option selected>Small</option>
+                        <option>Tiny</option>
+                    </select>
                 </td>
                 <td class="title">
-                    <--- vs --->
+                    --- vs ---
                 </td>
                 <td class="title" style="width:40%;padding-right:1em;text-align:left;">
                     <select id="rightsel" style="font-size: 1.1em;">
@@ -89,6 +125,11 @@
                         <option value=".jp2">JP2K-Kakadu</option>
                         <option value=".webp">WebP</option>
                         <option value=".png">Original</option>
+                    </select>
+                    <select id="rightqual" style="font-size: 1.1em;">
+                        <option>Medium</option>
+                        <option selected>Small</option>
+                        <option>Tiny</option>
                     </select>
                 </td>
             </tr>
@@ -104,18 +145,17 @@
         </table>
     </div>
     <script type="text/javascript" src="js/splitimage2.js"></script>
-    <div class="caption" style="max-width: 1080px; margin-left: auto; margin-right: auto; margin-bottom: 1em; padding-bottom: 2em; padding-left: 100px; padding-right: 100px;">
-        <p>bpgenc-0.9.1 -m 8 -q $Q, with x265-1.4+175 --aq-mode 1 --aq-strength 1.1 --psy-rd 0.2 --psy-rdoq 0.4 --deblock -1:-1</p>
+    <div class="caption" style="font-style: italic; border-bottom: 1px solid;">
+        <p>bpgenc-0.9.1 -m 8, with x265-1.4+189 --aq-mode 1 --deblock -1:-1 --crf $Q</p>
         <p>mozjpeg-3.0 -dc-scan-opt 2 -quality $Q</p>
         <p>kdu_compress-7.4 -quiet -no_info -full -precise -slope $Q</p>
         <p>cwebp-0.4.2 -m 6 -pass 10 -size $Q</p>
-
-        
     </div>
-    <div class="caption" style="max-width: 1080px; margin-left: auto; margin-right: auto; margin-bottom: 1em; padding-bottom: 2em; padding-left: 100px; padding-right: 100px;">
-    	<p>Images were first encoded with bpgenc at 25 QP/CRF. Everything else was matched to +/- 2.5% filesize.</p>
-    	<p>BPG and WebP javascript decoder. Only Safari can decode jp2k images.</p>
-        <p>This page is a lightly re-edited verysion of <a href="http://people.xiph.org/~xiphmont/demo/daala/update1-tool2b.shtml">Xiph.org's Daala comparison page.</a></p>
+    <div class="caption">
+        <p>Medium images were first encoded with bpgenc at 19 CRF filesizes. Small set to 60% of Medium. Tiny set to 60% of Small. Everything else was matched to +/- 2.5% filesize.</p>
+        <p>BPG, jpeg2000, and WebP decoded in javascript.</p>
+        <p>This page is based on <a href="http://people.xiph.org/~xiphmont/demo/daala/update1-tool2b.shtml">Xiph.org's Daala comparison page.</a>
+        </p>
     </div>
 </body>
 
