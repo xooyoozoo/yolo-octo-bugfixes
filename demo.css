@@ -1,0 +1,228 @@
+      body {
+	  margin: 0 auto 0 auto;
+	  padding-bottom: 30px;
+	  font-family: Verdana, Arial, Helvetica, sans-serif;
+	  color: #333333;
+	  background-color: #ffffff;
+	  max-width: 876px;
+	  font-size: 13px;
+      }
+
+      a {
+	  color: #3366cc;
+	  text-decoration: underline;
+	  cursor: pointer;
+      }
+      
+      img {
+	  border: 0;
+      }
+
+      p {
+	  clear: both;
+	  line-height: 1.25em;
+	  text-align: justify;
+      }
+
+      table {
+	  border-style: none;
+      }
+
+      table.visual {
+	  border-style: none;
+      }
+
+      .visual td, th {
+	  text-align: center;
+	  padding: .4em 1.5em .4em 1.5em;
+	  border: 1px solid;
+      }
+
+      table.align {
+	  border: 0px solid;
+      }
+
+      th {
+	  background-color: #aabbff;
+      }
+
+      img.caption {
+	  margin-left: auto;
+	  margin-right: auto;
+	  margin-top: 3em;
+	  margin-bottom: 2em;
+	  display: block;
+      }
+
+      div.caption {
+	  display: block;
+	  text-align: center;
+	  font-style: italic;
+	  color: #5f8097;
+	  margin-left: 8em;
+	  margin-right: 8em;
+	  padding-bottom: 1em;
+	  margin-bottom: 3em;
+	  border-bottom: 1px solid #9FC0D7;
+      }
+      
+      div.plus {
+	  padding-bottom: 0em;
+	  border: 0px;
+      }
+
+      .caption p {
+	  line-height: 1em;
+	  text-align: left;
+	  padding: 0px;
+	  margin-top: 1em;
+	  margin-bottom: -1em;
+	  padding-bottom: 1em;
+	  clear: none;
+      }
+
+      .caption img, .caption div {
+	  position: relative;
+	  float: left;
+	  margin: 0px;
+	  padding: 0px;
+	  margin-right: 2em;
+	  margin-bottom: 1.5em;
+      }
+
+      .caption div {
+	  background: white;
+      }
+
+      hr {
+	  height: 1px;
+	  border: 0px solid #ffffff;
+	  border-bottom: 1px solid #9fc0d7;
+	  width: 100%;
+	  padding: 0px;
+	  margin: 2em;
+	  margin-bottom: 1em;
+	  margin-left: auto;
+	  margin-right: auto;
+      }
+
+      .caption .demowrapper {
+	  float: none;
+	  clear: both;
+	  background: none;
+          padding: 0px;
+          margin: 0px;
+          width: 100%;
+      }
+
+      .caption img.center {
+	  float: none;
+	  margin: 0px;
+	  padding: 0px;
+	  margin-left: auto;
+	  margin-right: auto;
+      }
+
+      .broken {
+	  color: #c0c0c0
+      }
+
+      h1 {
+	  padding: 0px;
+	  margin: 1.3em 0 8px 0;
+	  font-size: 1.5em;
+	  position: relative;
+	  float: right;
+	  margin: 14px;
+	  padding-top: 36px;
+	  margin-top: -.8em;
+	  font-weight: bold;
+	  color: #ff9900;
+      }
+      
+      .or {
+	  padding: 0px;
+	  margin: 0px;
+	  margin-top: -14px;
+	  margin-right: 14px;
+	  font-size: 1em;
+	  position: relative;
+	  clear: right;
+	  float: right;
+	  color: #0000f0;
+      }
+      
+      h2, h2 a, h3, h3 a {
+	  font-weight: bold;
+	  color: #ff9900;
+	  margin: 1.3em 0 8px 0;
+      }
+
+      h2 {
+	  font-size: 1.2em;
+      }
+
+      h3 {
+	  font-size: 1.1em;
+      }
+
+      li {
+	  line-height: 1.4;
+      }
+
+      tt {
+	  color: #000080;
+      }
+
+      i {
+	  color: #606000;
+      }
+
+      address {
+	  text-align: center;
+	  margin-bottom: 1.5em;
+      }
+
+      .demo, .prebox {
+	  color: #000000;
+	  background-color: #d3d3d3;
+	  /*background: -moz-linear-gradient(top, #e1f8fd, #ccf5fd);
+	  background: -webkit-linear-gradient(top, #e1f8fd, #ccf5fd);
+	  background: -ms-linear-gradient(top, #e1f8fd, #ccf5fd);
+	  background: -o-linear-gradient(top, #e1f8fd, #ccf5fd);*/
+	  /*margin: 2em;*/
+	  margin-left: 0em;
+	  margin-right: 0em;
+	  margin-bottom: 1.5em;
+	  padding: 1em;
+	  padding-bottom: 0em;
+	  /*border-radius: 15px;
+	  border: 2px solid #b8dde6;*/
+	  min-width: 840px;
+      }
+
+      .demo table {
+	  margin-left: auto;
+	  margin-right: auto;
+
+      }
+
+      .demo table .title {
+	  font-weight: bold;
+	  font-size: 1.2em;
+	  color: #203090;
+	  text-align: center;
+      }
+
+      .demo .ribbon {
+	  margin-top: 1em;
+	  margin-left: auto;
+	  margin-right: auto;
+	  text-align: center;
+      }
+
+      .demo .caption {
+	  margin: 1.5em 1em .2em 1em;
+	  padding-bottom: 2em;
+	  color: #3f5087;
+      }

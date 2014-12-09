@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" title="default demosheet" media="screen" href="demo.css" type="text/css" />
+    <title>____</title>
+    <script type="text/javascript" src="js/libwebp-0.1.3.min.js"></script>
+    <script type="text/javascript" src="js/bpgdec.js"></script>
+</head>
+
+<body style="max-width: 100%;">
+
+    <div class="demo" style="margin-left: auto; margin-right: auto; overflow:hidden;">
+        <table>
+            <tr>
+                <td class="title" colspan=3>
+                    <select id="filesel" style="font-size: 1.1em; margin-bottom: 1em;">
+                        <option value="08-2011._Panthera_tigris_tigris_-_Texas_Park_-_Lanzarote_-TP04">Tiger</option>
+                        <option value="89_-_Vézelay_Basilique_2">Vézelay_Basilique</option>
+                        <option value="125_-_Québec_-_Pont_de_Québec_de_nuit_-_Septembre_2009">Pont de Québec at Night</option>
+                        <option value="205_-_Vallée_de_Colca_-_Panorama_-_Juin_2010_-_5_de_6">Vallée de Colca</option>
+                        <option value="2011-03-05_03-13_Madeira_159_Funchal,_Mercado_dos_Lavradores">Mercado dos Lavradores</option>
+                        <option value="Abandoned_Packard_Automobile_Factory_Detroit_200">Abandoned Factory</option>
+                        <option value="Adventure_with_the_Windmills">Adventure with the Windmills</option>
+                        <option value="Air_Force_Academy_Chapel,_Colorado_Springs,_CO_04090u_original">Air Force Academy Chapel</option>
+                        <option value="Albi,_Cathédrale_Sainte_Cécile_(3)">Cathédrale Sainte Cécile</option>
+                        <option value="Bath_from_alexandra_park">Bath from Alexandra Park</option>
+                        <option value="Buenos_Aires_Cityline_at_Night_-_Irargerich">Buenos Aires</option>
+                        <option value="Catedral_de_Toledo.Altar_Mayor_(huge)">Catedral de Toledo</option>
+                        <option value="Cecret_Lake_Panorama_Albion_Basin_Alta_Utah_July_2009">Cecret Lake</option>
+                        <option value="Citroen_C4F">Citroen</option>
+                        <option value="Claudette_14_july_2003_1920Z">Claudette</option>
+                        <option value="Clovisfest">Clovisfest</option>
+                        <option value="Correfocs_Festa_Major_del_Clot_2009">Correfocs</option>
+                        <option value="Crepuscular_rays_at_Sunset_near_Waterberg_Plateau">Crepuscular Rays</option>
+                        <option value="Eaglefairy_hst_big">Eaglefairy</option>
+                        <option value="End_of_Show_3">End of Show</option>
+                        <option value="Endeavour_with_Columbia_Ferry_Flyby_-_GPN-2000-001996">Endeavor and Columbia</option>
+                        <option value="Florac-Le_Vibron-Source_du_Pêcher">Le Vibron</option>
+                        <option value="Fruits_oranges,_jardin_japonais_2">Fruits</option>
+                        <option value="GrimburgwalAmsterdam">Grimburgwal</option>
+                        <option value="IENA_-_Avenches_-_6">Avenches</option>
+                        <option value="Kopenhagen,_Tivoli-9120">Kopenhagen</option>
+                        <option value="Krøyer_PS">Krøyer</option>
+                        <option value="Lufthansa_Aviation_Center_after_sunset_-_Frankfurt_-_Germany_-_near_Airport_Frankfurt_-_Fraport_-_03">Lufthansa</option>
+                        <option value="MEG_20110701_Japan_Expo_02">MEG</option>
+                        <option value="Moscow_July_2011-4a">Moscow</option>
+                        <option value="Mrio_sdp1">Mrio</option>
+                        <option value="Mural_in_Northeast_Pavillion,_Thomas_Jefferson_Building_by_Elmer_E._Garnsey_11670u_edit">Mural</option>
+                        <option value="Nestor_meridionalis_-Rotorua,_North_Island,_New_Zealand-8a">Nestor</option>
+                        <option value="Nymphe_et_Amour_tenant_une_guirlande_-_Statues_du_Parterre_d'Eau_-_Château_de_Versailles_-_P1050390-P1050394_-_rectilinear">Nymph</option>
+                        <option value="Ohashi0806shield">Ohashi</option>
+                        <option value="Production_of_B-24_bombers_and_C-87_transports2">Production</option>
+                        <option value="Reykjavík_03">Reykjavík</option>
+                        <option value="ST_vs_RCT_-_December_2011_-_077">Mascot</option>
+                        <option value="Seikima-II_20100704_Japan_Expo_32">Seikima-II</option>
+                        <option value="Sking">Sking</option>
+                        <option value="Southern_pacific_1215">Southern Pacific</option>
+                        <option value="Steinway_Vienna_panoramic">Steinway</option>
+                        <option value="Swallowtail_05_06_07" selected>Swallowtail</option>
+                        <option value="US_Navy_091029-M-5645B-091_A_landing_craft,_air_cushion_(LCAC)_and_the_U.S._Coast_Guard_patrol_boat_Albacore_are_underway_near_Naval_Station_Norfolk">Hovercraft (no eels)</option>
+                        <option value="US_Navy_111117-N-UB993-082_A_Sailor_examines_a_patient_during_drill">Medic</option>
+                        <option value="US_Open_Tennis_2010_1st_Round_046">Tennis</option>
+                        <option value="Vid_Gajsek_-_Rojstnodnevna_referendumska_kavica">Kavica</option>
+                        <option value="Washington_Monument,_Washington,_D.C._04037u_original">Washington Monument</option>
+                        <option value="Wasserfassstelle_von_1898_im_Schanerloch">Waterfall</option>
+                        <option value="White_Dune_-_Mui_Ne">White Dune</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="title" style="width:40%;padding-left:1em;text-align:right;">
+                    <select id="leftsel" style="font-size: 1.1em;">
+                        <option value=".bpg">BPG-x265</option>
+                        <option value=".jpg" selected>Mozjpeg</option>
+                        <option value=".jp2">JP2K-Kakadu</option>
+                        <option value=".webp">WebP</option>
+                        <option value=".png">Original</option>
+                    </select>
+                </td>
+                <td class="title">
+                    <--- vs --->
+                </td>
+                <td class="title" style="width:40%;padding-right:1em;text-align:left;">
+                    <select id="rightsel" style="font-size: 1.1em;">
+                        <option value=".bpg" selected>BPG-x265</option>
+                        <option value=".jpg">Mozjpeg</option>
+                        <option value=".jp2">JP2K-Kakadu</option>
+                        <option value=".webp">WebP</option>
+                        <option value=".png">Original</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style="padding: .5em;padding-bottom: 2em;">
+                    <div id="rightcontainer" style="margin-left: auto; margin-right: auto; position: relative; width:800px; height:800px;">
+                        <div id="leftcontainer" style="border-right: 1px dotted white; width:800px; height:800px;"></div>
+                        <div id="lefttext" style="position: absolute; color: white; padding:.2em .5em .2em .5em;"></div>
+                        <div id="righttext" style="position: absolute; color: white; padding:.2em .5em .2em .5em;"></div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script type="text/javascript" src="js/splitimage2.js"></script>
+    <div class="caption" style="max-width: 1080px; margin-left: auto; margin-right: auto; margin-bottom: 1em; padding-bottom: 2em; padding-left: 100px; padding-right: 100px;">
+        <p>bpgenc-0.9.1 -m 8 -q $Q, with x265-1.4+175 --aq-mode 1 --aq-strength 1.1 --psy-rd 0.2 --psy-rdoq 0.4 --deblock -1:-1</p>
+        <p>mozjpeg-3.0 -dc-scan-opt 2 -quality $Q</p>
+        <p>kdu_compress-7.4 -quiet -no_info -full -precise -slope $Q</p>
+        <p>cwebp-0.4.2 -m 6 -pass 10 -size $Q</p>
+
+        
+    </div>
+    <div class="caption" style="max-width: 1080px; margin-left: auto; margin-right: auto; margin-bottom: 1em; padding-bottom: 2em; padding-left: 100px; padding-right: 100px;">
+    	<p>Images were first encoded with bpgenc at 25 QP/CRF. Everything else was matched to +/- 2.5% filesize.</p>
+    	<p>BPG and WebP javascript decoder. Only Safari can decode jp2k images.</p>
+        <p>This page is a lightly re-edited verysion of <a href="http://people.xiph.org/~xiphmont/demo/daala/update1-tool2b.shtml">Xiph.org's Daala comparison page.</a></p>
+    </div>
+</body>
+
+</html>
