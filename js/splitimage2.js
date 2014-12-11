@@ -85,13 +85,6 @@ function set_split() {
     }
 }
 
-function j2k_to_image(data) {
-    run();
-    _STDIO.prepare('image.j2k', data);
-    callMain(['-i', 'image.j2k', '-o', 'image.raw']);
-    return _STDIO.streams[_STDIO.filenames['image.raw']].data;
-}
-
 function set_image(container, name, codec) {
     container.style.background = "gray";
     container.style.backgroundImage = "";
