@@ -283,8 +283,6 @@ set_file();
 
 set_split();
 right.addEventListener("mousemove", movesplit, false);
-right.addEventListener("touchstart", movesplit, false);
-right.addEventListener("touchmove", movesplit, false);
-right.addEventListener("click", sticksplit, false);
+right.addEventListener("click", movesplit, false);
 righttext.style.backgroundColor = "rgba(0,0,0,.3)";
 lefttext.style.backgroundColor = "rgba(0,0,0,.3)";
