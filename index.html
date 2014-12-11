@@ -4,9 +4,9 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" title="default demosheet" media="screen" href="demo.css" type="text/css" />
-    <title>____</title>
-    <script type="text/javascript" src="js/bpgdec-0.9.1.js"></script>
-    <!-- <script>
+    <title>BPG Image Comparison</title>
+    <script type="text/javascript" src="js/bpgdec-0.9.2.js"></script>
+    <!-- <script type="text/javascript">
     (function() {
         var jp2k = new Image();
         jp2k.onerror = jp2k.load = function() {
@@ -22,7 +22,7 @@
         jp2k.src = 'data:image/jp2;base64,AAAADGpQICANCocKAAAAFGZ0eXBqcDIgAAAAAGpwMiAAAAAtanAyaAAAABZpaGRyAAAABAAAAAQAAw8HAAAAAAAPY29scgEAAAAAABAAAABpanAyY/9P/1EALwAAAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAEAAAAAAAAAAAAAw8BAQ8BAQ8BAf9SAAwAAAABAQAEBAAB/1wABECA/5AACgAAAAAAGAAB/5PP/BAQFABcr4CA/9k=';
     })();
     </script> -->
-    <script>
+    <script type="text/javascript">
     (function() {
         var WebP = new Image();
         WebP.onload = WebP.onerror = function() {
@@ -32,7 +32,7 @@
                 sc.async = true;
                 var s = document.getElementsByTagName('script')[0];
                 sc.src = 'js/webpjs-0.0.2.min.js';
-                s.parentNode.insertBefore(sc, s.nextSibling);
+                s.parentNode.insertBefore(sc, s);
             }
         };
         WebP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
@@ -47,56 +47,56 @@
             <tr>
                 <td class="title" colspan=3>
                     <select id="filesel" style="font-size: 1.1em; margin-bottom: 1em;">
-                        <option value="08-2011._Panthera_tigris_tigris_-_Texas_Park_-_Lanzarote_-TP04">Tiger</option>
-                        <option value="89_-_Vézelay_Basilique_2">Vézelay_Basilique</option>
-                        <option value="125_-_Québec_-_Pont_de_Québec_de_nuit_-_Septembre_2009">Pont de Québec at Night</option>
-                        <option value="205_-_Vallée_de_Colca_-_Panorama_-_Juin_2010_-_5_de_6">Vallée de Colca</option>
+                        <option value="125_-_Québec_-_Pont_de_Québec_de_nuit_-_Septembre_2009">Pont de Québec at Night</option>
                         <option value="2011-03-05_03-13_Madeira_159_Funchal,_Mercado_dos_Lavradores">Mercado dos Lavradores</option>
+                        <option value="205_-_Vallée_de_Colca_-_Panorama_-_Juin_2010_-_5_de_6">Vallée de Colca</option>
+                        <option value="77_Bombay_Street_Photo_by_Sven_Fischer">77 Bombay Street</option>
+                        <option value="80-Machu_Picchu-Juin_2009-edit.2">Machu Picchu</option>
                         <option value="Abandoned_Packard_Automobile_Factory_Detroit_200">Abandoned Factory</option>
                         <option value="Adventure_with_the_Windmills">Adventure with the Windmills</option>
                         <option value="Air_Force_Academy_Chapel,_Colorado_Springs,_CO_04090u_original">Air Force Academy Chapel</option>
-                        <option value="Albi,_Cathédrale_Sainte_Cécile_(3)">Cathédrale Sainte Cécile</option>
-                        <option value="Bath_from_alexandra_park">Bath from Alexandra Park</option>
+                        <option value="Bas_Relief_Cuverville03_hq">Bas-relief</option>
+                        <option value="Bodhi_Baum,_Sri_Lanka">Bodhi Baum</option>
                         <option value="Buenos_Aires_Cityline_at_Night_-_Irargerich">Buenos Aires</option>
+                        <option value="Camelo-Timanfaya-Lanzarote-Illas_Canarias-Spain-T32">Camel</option>
                         <option value="Catedral_de_Toledo.Altar_Mayor_(huge)">Catedral de Toledo</option>
-                        <option value="Cecret_Lake_Panorama_Albion_Basin_Alta_Utah_July_2009">Cecret Lake</option>
                         <option value="Citroen_C4F">Citroen</option>
                         <option value="Claudette_14_july_2003_1920Z">Claudette</option>
-                        <option value="Clovisfest" selected>Clovisfest</option>
-                        <option value="Correfocs_Festa_Major_del_Clot_2009">Correfocs</option>
-                        <option value="Crepuscular_rays_at_Sunset_near_Waterberg_Plateau">Crepuscular Rays</option>
+                        <option value="Clovisfest">Clovisfest</option>
                         <option value="Eaglefairy_hst_big">Eaglefairy</option>
-                        <option value="End_of_Show_3">End of Show</option>
                         <option value="Endeavour_with_Columbia_Ferry_Flyby_-_GPN-2000-001996">Endeavor and Columbia</option>
-                        <option value="Florac-Le_Vibron-Source_du_Pêcher">Le Vibron</option>
+                        <option value="Erfurt_Dom_Domtreppe_Severikirche_at_night">Erfurt Cathedral</option>
+                        <option value="Euphagus_cyanocephalus-Oakland,_California,_USA-adult_male_with_chick-8c">Brewer's Blackbird</option>
+                        <option value="Exercises_at_the_barre,_Prix_de_Lausanne_2010-2">Exercise</option>
+                        <option value="Florac-Le_Vibron-Source_du_Pêcher">Le Vibron</option>
                         <option value="Fruits_oranges,_jardin_japonais_2">Fruits</option>
-                        <option value="GrimburgwalAmsterdam">Grimburgwal</option>
                         <option value="IENA_-_Avenches_-_6">Avenches</option>
-                        <option value="Kopenhagen,_Tivoli-9120">Kopenhagen</option>
+                        <option value="IrishMannequinNOLAHighsmith">Irish Mannequin</option>
+                        <option value="Isle_Of_Skye_A863_The_Cuillins">Isle of Skye</option>
+                        <option value="Koln-Night-GavinCato">Cologne Cathedral</option>
                         <option value="Krøyer_PS">Krøyer</option>
-                        <option value="Lufthansa_Aviation_Center_after_sunset_-_Frankfurt_-_Germany_-_near_Airport_Frankfurt_-_Fraport_-_03">Lufthansa</option>
-                        <option value="MEG_20110701_Japan_Expo_02">MEG</option>
+                        <option value="Michigan_Stadium_2011">Stadium</option>
                         <option value="Moscow_July_2011-4a">Moscow</option>
                         <option value="Mrio_sdp1">Mrio</option>
-                        <option value="Mural_in_Northeast_Pavillion,_Thomas_Jefferson_Building_by_Elmer_E._Garnsey_11670u_edit">Mural</option>
-                        <option value="Nestor_meridionalis_-Rotorua,_North_Island,_New_Zealand-8a">Nestor</option>
-                        <option value="Nymphe_et_Amour_tenant_une_guirlande_-_Statues_du_Parterre_d'Eau_-_Château_de_Versailles_-_P1050390-P1050394_-_rectilinear">Nymph</option>
-                        <option value="Ohashi0806shield">Ohashi</option>
+                        <option value="Nan_Lian_Garden_7645432">Nan Lian Garden</option>
+                        <option value="Nymphe_et_Amour_tenant_une_guirlande_-_Statues_du_Parterre_d'Eau_-_Château_de_Versailles_-_P1050390-P1050394_-_rectilinear">Nymph</option>
                         <option value="Production_of_B-24_bombers_and_C-87_transports2">Production</option>
-                        <option value="Reykjavík_03">Reykjavík</option>
+                        <option value="Red_Bull_Jungfrau_Stafette,_10th_stage-vintage_cars-2-">Vintage Car</option>
+                        <option value="Ricardo_Quaresma-L-,_Pablo_Zabaleta-R-Portugal_vs._Argentina,_9th_February_2011" selected>Soccer Players</option>
+                        <option value="Road_to_A_rstein,_2010_September">Dirt Road</option>
                         <option value="ST_vs_RCT_-_December_2011_-_077">Mascot</option>
-                        <option value="Seikima-II_20100704_Japan_Expo_32">Seikima-II</option>
+                        <option value="Saint_Catherine-Caravaggio-1598-">Saint Catherine</option>
                         <option value="Sking">Sking</option>
                         <option value="Southern_pacific_1215">Southern Pacific</option>
                         <option value="Steinway_Vienna_panoramic">Steinway</option>
                         <option value="Swallowtail_05_06_07">Swallowtail</option>
-                        <option value="US_Navy_091029-M-5645B-091_A_landing_craft,_air_cushion_(LCAC)_and_the_U.S._Coast_Guard_patrol_boat_Albacore_are_underway_near_Naval_Station_Norfolk">Hovercraft (no eels)</option>
-                        <option value="US_Navy_111117-N-UB993-082_A_Sailor_examines_a_patient_during_drill">Medic</option>
+                        <option value="Thomas_Bresson-Fort_de_Roppe-abri-caverne-">Fort de Roppe</option>
                         <option value="US_Open_Tennis_2010_1st_Round_046">Tennis</option>
                         <option value="Vid_Gajsek_-_Rojstnodnevna_referendumska_kavica">Kavica</option>
+                        <option value="Vocabulaire_de_l_acade_mie,_1832_01">Old Book</option>
                         <option value="Washington_Monument,_Washington,_D.C._04037u_original">Washington Monument</option>
                         <option value="Wasserfassstelle_von_1898_im_Schanerloch">Waterfall</option>
-                        <option value="White_Dune_-_Mui_Ne">White Dune</option>
+                        <option value="Zoo_de_la_Barben_20100605_048">Zoo Bird Head</option>
                     </select>
                 </td>
             </tr>
@@ -110,6 +110,7 @@
                         <option value=".png">Original</option>
                     </select>
                     <select id="leftqual" style="font-size: 1.1em;">
+                        <option>Large</option>
                         <option>Medium</option>
                         <option selected>Small</option>
                         <option>Tiny</option>
@@ -127,6 +128,7 @@
                         <option value=".png">Original</option>
                     </select>
                     <select id="rightqual" style="font-size: 1.1em;">
+                        <option>Large</option>
                         <option>Medium</option>
                         <option selected>Small</option>
                         <option>Tiny</option>
@@ -152,9 +154,10 @@
         <p>cwebp-0.4.2 -m 6 -pass 10 -size $Q</p>
     </div>
     <div class="caption">
-        <p>Medium images were first encoded with bpgenc at 19 CRF filesizes. Small set to 60% of Medium. Tiny set to 60% of Small. Everything else was matched to +/- 2.5% filesize.</p>
+        <p>Medium images were first encoded with bpgenc at 19 CRF filesizes.
+            <br>Large is 67% larger than Medium. Small is 60% of Medium. Tiny is 60% of Small. Everything else was matched to +/- 5% filesize.</p>
         <p>BPG, jpeg2000, and WebP decoded in javascript.</p>
-        <p>This page is based on <a href="http://people.xiph.org/~xiphmont/demo/daala/update1-tool2b.shtml">Xiph.org's Daala comparison page.</a>
+        <p>This page is based on <a href="http://people.xiph.org/~xiphmont/demo/daala/update1-tool2b.shtml" target="_blank">Xiph.org's</a> Daala comparison page. A list of sources for the images can be found in <a href="cite_images.txt" target="_blank">this text file</a>.
         </p>
     </div>
 </body>

@@ -1,3 +1,29 @@
+(function() {
+    var cl = document.getElementById('filesel');
+    var clTexts = new Array();
+
+    for (i = 0; i < cl.length; i++) {
+        clTexts[i] =
+            cl.options[i].text.toUpperCase() + "|=" +
+            cl.options[i].text + "|=" +
+            cl.options[i].value + "|=" +
+            cl.options[i].selected;
+    }
+    clTexts.sort();
+
+    for (i = 0; i < cl.length; i++) {
+        var parts = clTexts[i].split('|=');
+
+        cl.options[i].text = parts[1];
+        cl.options[i].value = parts[2];
+        if (parts[3] == "true") {
+            cl.options[i].selected = true;
+        } else {
+            cl.options[i].selected = false;
+        }
+    }
+})(); // Dynamically alphabetize file selection list
+
 var leftsel = document.getElementById('leftsel');
 var rightsel = document.getElementById('rightsel');
 var filesel = document.getElementById('filesel');
