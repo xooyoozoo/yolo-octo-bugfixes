@@ -85,158 +85,147 @@ function set_split() {
     }
 }
 
-function set_image(container, name, codec) {
+function set_image(container, name, codec, side) {
     container.style.background = "gray";
     container.style.backgroundImage = "";
     var path = 'comparisonfiles/' + name + '/' + urlfile + codec;
 
-    if (codec == '.bpg') {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", path, true);
+    xhr.responseType = "blob";
+
+    xhr.onload = function() {
+        var response = xhr.response;
+        var path = URL.createObjectURL(response);
+
         var canvas = document.createElement("canvas");
         var ctx = canvas.getContext("2d");
-        var image = new BPGDecoder(ctx);
-        image.onload = function() {
-            canvas.width = this.imageData.width;
-            canvas.height = this.imageData.height;
-            ctx.putImageData(this.imageData, 0, 0);
-            set_size(canvas.toDataURL(), canvas.width, canvas.height, container);
-        };
-        image.load(path);
-    } else {
-        var image = new Image();
-        image.onload = function() {
-            set_size(image.src, image.width, image.height, container)
-        };
-        image.onerror = function() {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", path, true);
-            xhr.responseType = "arraybuffer";
 
-            xhr.onload = function(event) {
-                var canvas = document.createElement("canvas");
-                var ctx = canvas.getContext("2d");
+        if (codec == '.bpg') {
+            var image = new BPGDecoder(ctx);
+            image.onload = function() {
+                canvas.width = this.imageData.width;
+                canvas.height = this.imageData.height;
+                ctx.putImageData(this.imageData, 0, 0);
+                set_size(canvas.toDataURL(), canvas.width, canvas.height, container);
+            };
+            image.load(path);
+        } else {
+            var image = new Image();
+            image.src = path;
+            image.onload = function() {
+                set_size(image.src, image.width, image.height, container)
+            };
+            image.onerror = function() {
+                var data;
+                var arrayBufferNew = null;
+                var fileReader = new FileReader();
+                fileReader.onload = function(progressEvent) {
+                    arrayBufferNew = this.result;
+                    var data = new Uint8Array(arrayBufferNew);
+                    if (codec == '.webp') {
+                        var decoder = new WebPDecoder();
 
-                var response = xhr.response;
-                var data = new Uint8Array(response);
+                        var config = decoder.WebPDecoderConfig;
+                        var output_buffer = config.output;
+                        var bitstream = config.input;
+                        var StatusCode = decoder.VP8StatusCode;
 
-                if (codec == '.webp') {
-                    var decoder = new WebPDecoder();
+                        var status = decoder.WebPGetFeatures(data, data.length, bitstream);
 
-                    var config = decoder.WebPDecoderConfig;
-                    var output_buffer = config.output;
-                    var bitstream = config.input;
-                    var StatusCode = decoder.VP8StatusCode;
+                        var mode = decoder.WEBP_CSP_MODE;
+                        output_buffer.colorspace = mode.MODE_ARGB;
 
-                    status = decoder.WebPGetFeatures(data, data.length, bitstream);
+                        status = decoder.WebPDecode(data, data.length, config);
+                        var bitmap = output_buffer.u.RGBA.rgba;
 
-                    var mode = decoder.WEBP_CSP_MODE;
-                    output_buffer.colorspace = mode.MODE_ARGB;
+                        var biWidth = output_buffer.width;
+                        var biHeight = output_buffer.height;
 
-                    status = decoder.WebPDecode(data, data.length, config);
-                    var bitmap = output_buffer.u.RGBA.rgba;
-
-                    var biWidth = output_buffer.width;
-                    var biHeight = output_buffer.height;
-
-                    canvas.width = biWidth;
-                    canvas.height = biHeight;
-                    var output = ctx.createImageData(canvas.width, canvas.height);
-                    var outputData = output.data;
-
-                    for (var h = 0; h < biHeight; h++) {
-                        for (var w = 0; w < biWidth; w++) {
-                            outputData[0 + w * 4 + (biWidth * 4) * h] = bitmap[1 + w * 4 + (biWidth * 4) * h];
-                            outputData[1 + w * 4 + (biWidth * 4) * h] = bitmap[2 + w * 4 + (biWidth * 4) * h];
-                            outputData[2 + w * 4 + (biWidth * 4) * h] = bitmap[3 + w * 4 + (biWidth * 4) * h];
-                            outputData[3 + w * 4 + (biWidth * 4) * h] = bitmap[0 + w * 4 + (biWidth * 4) * h];
-                        };
-                    };
-                    ctx.putImageData(output, 0, 0);
-                    set_size(canvas.toDataURL("image/png"), canvas.width, canvas.height, container);
-                } else if (codec == '.jp2') {
-                    var worker = new Worker('js/jp2kworker.js');
-                    worker.onmessage = function(event) {
-                        var bitmap = event.data;
-                        var pixelsPerChannel = bitmap.width * bitmap.height;
-                        //console.log(bitmap);
-
-                        canvas.width = bitmap.width;
-                        canvas.height = bitmap.height;
+                        canvas.width = biWidth;
+                        canvas.height = biHeight;
                         var output = ctx.createImageData(canvas.width, canvas.height);
+                        var outputData = output.data;
 
-                        var i = 0,
-                            j = 0;
-                        while (i < output.data.length && j < pixelsPerChannel) {
-                            output.data[i] = bitmap.data[j]; // R
-                            output.data[i + 1] = bitmap.data[j + pixelsPerChannel]; // G
-                            output.data[i + 2] = bitmap.data[j + (2 * pixelsPerChannel)]; // B
-                            output.data[i + 3] = 255; // A
-
-                            // Next pixel
-                            i += 4;
-                            j += 1;
+                        for (var h = 0; h < biHeight; h++) {
+                            for (var w = 0; w < biWidth; w++) {
+                                outputData[0 + w * 4 + (biWidth * 4) * h] = bitmap[1 + w * 4 + (biWidth * 4) * h];
+                                outputData[1 + w * 4 + (biWidth * 4) * h] = bitmap[2 + w * 4 + (biWidth * 4) * h];
+                                outputData[2 + w * 4 + (biWidth * 4) * h] = bitmap[3 + w * 4 + (biWidth * 4) * h];
+                                outputData[3 + w * 4 + (biWidth * 4) * h] = bitmap[0 + w * 4 + (biWidth * 4) * h];
+                            };
                         };
                         ctx.putImageData(output, 0, 0);
                         set_size(canvas.toDataURL("image/png"), canvas.width, canvas.height, container);
-                    };
-                    worker.postMessage({
-                        bytes: data,
-                        extension: 'jp2'
-                    });
+                    } else if (codec == '.jp2') {
+                        var worker = new Worker('js/jp2kworker.js');
+                        worker.onmessage = function(event) {
+                            var bitmap = event.data;
+                            var pixelsPerChannel = bitmap.width * bitmap.height;
+
+                            canvas.width = bitmap.width;
+                            canvas.height = bitmap.height;
+                            var output = ctx.createImageData(canvas.width, canvas.height);
+
+                            var i = 0,
+                                j = 0;
+                            while (i < output.data.length && j < pixelsPerChannel) {
+                                output.data[i] = bitmap.data[j]; // R
+                                output.data[i + 1] = bitmap.data[j + pixelsPerChannel]; // G
+                                output.data[i + 2] = bitmap.data[j + (2 * pixelsPerChannel)]; // B
+                                output.data[i + 3] = 255; // A
+                                // Next pixel
+                                i += 4;
+                                j += 1;
+                            };
+                            ctx.putImageData(output, 0, 0);
+                            set_size(canvas.toDataURL("image/png"), canvas.width, canvas.height, container);
+                        };
+                        worker.postMessage({
+                            bytes: data,
+                            extension: 'jp2'
+                        });
+                    } else console.error("No support for " + url);
                 };
+                fileReader.readAsArrayBuffer(response);
             };
-            xhr.send();
+        }
+
+        var kbytes = (response.size / 1024).toFixed(1) + " KB";
+        if (side == "right") {
+            righttext.innerHTML = "&rarr;&nbsp;" + kbytes;
+        } else if (side == "left") {
+            lefttext.innerHTML = kbytes + "&nbsp;&larr;";
+            textheight = lefttext.offsetHeight;
         };
-        image.src = path;
-    }
-}
-
-function get_size(name, codec) {
-    var path = 'comparisonfiles/' + name + '/' + urlfile + codec;
-    var obj = new XMLHttpRequest();
-    obj.open('HEAD', path, false);
-    obj.send();
-    var size = obj.getResponseHeader('Content-Length');
-
-    if (!size) {
-        return name;
-    } else {
-        return (size / 1024).toFixed(1) + " KB";
-    }
+    };
+    xhr.send();
 }
 
 function set_left() {
-    var quality;
+    var quality = '';
     var image = leftsel.options[leftsel.selectedIndex].getAttribute("value");
     var name = leftsel.options[leftsel.selectedIndex].innerHTML;
 
-    if (name == 'Original') {
-        quality = '';
-    } else {
+    if (name != 'Original') {
         quality = leftqual.options[leftqual.selectedIndex].innerHTML.toLowerCase() + '/';
     }
     name = quality + name;
 
-    set_image(left, name, image, quality);
-    name = get_size(name, image);
-    lefttext.innerHTML = name + "&nbsp;&larr;";
-    textheight = lefttext.offsetHeight;
+    set_image(left, name, image, 'left');
 }
 
 function set_right() {
-    var quality;
+    var quality = '';
     var image = rightsel.options[rightsel.selectedIndex].getAttribute("value");
     var name = rightsel.options[rightsel.selectedIndex].innerHTML;
 
-    if (name == 'Original') {
-        quality = '';
-    } else {
+    if (name != 'Original') {
         quality = rightqual.options[rightqual.selectedIndex].innerHTML.toLowerCase() + '/';
     }
     name = quality + name;
 
-    set_image(right, name, image, quality);
-    name = get_size(name, image);
-    righttext.innerHTML = "&rarr;&nbsp;" + name;
+    set_image(right, name, image, 'right');
 }
 
 function set_file() {
