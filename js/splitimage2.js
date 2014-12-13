@@ -35,11 +35,20 @@ var jp2kWorker = null;
     jp2k.src = 'data:image/jp2;base64,AAAADGpQICANCocKAAAAFGZ0eXBqcDIgAAAAAGpwMiAAAAAtanAyaAAAABZpaGRyAAAABAAAAAQAAw8HAAAAAAAPY29scgEAAAAAABAAAABpanAyY/9P/1EALwAAAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAEAAAAAAAAAAAAAw8BAQ8BAQ8BAf9SAAwAAAABAQAEBAAB/1wABECA/5AACgAAAAAAGAAB/5PP/BAQFABcr4CA/9k=';
 })();
 
-var leftsel = document.getElementById('leftsel');
-var rightsel = document.getElementById('rightsel');
+var leftSel = document.getElementById('leftSel');
+var rightSel = document.getElementById('rightSel');
 var filesel = document.getElementById('filesel');
-var left = document.getElementById('leftcontainer');
-var right = document.getElementById('rightcontainer');
+var left = document.getElementById('leftContainer');
+var right = document.getElementById('rightContainer');
+
+var viewOptions = [
+    '', /* file */
+    '', /* left-image */
+    '', /* left-quality */
+    '', /* right-image */
+    ''  /* right-quality */
+];
+
 var offset = {
     width: right.getBoundingClientRect().width,
     height: right.getBoundingClientRect().height
@@ -50,28 +59,46 @@ var splitx_target = splitx;
 var splity_target = splity;
 var splitx1 = 0;
 var splity1 = 0;
-var lefttext = document.getElementById('lefttext');
-var righttext = document.getElementById('righttext');
+var leftText = document.getElementById('leftText');
+var rightText = document.getElementById('rightText');
 var urlfile;
 var stick = 0;
 var timer;
-var textheight = lefttext.offsetHeight;
+var textheight = leftText.offsetHeight;
 var first = 1;
 
-leftsel.onchange = function() {
-    set_left();
+leftSel.onchange = function() {
+    setLeft();
 };
-leftqual.onchange = function() {
-    set_left();
+leftQual.onchange = function() {
+    setLeft();
 };
-rightsel.onchange = function() {
-    set_right();
+rightSel.onchange = function() {
+    setRight();
 };
-rightqual.onchange = function() {
-    set_right();
+rightQual.onchange = function() {
+    setRight();
 };
 filesel.onchange = function() {
-    set_file();
+    setFile();
+};
+
+var slug = function(str) {
+    str = str.replace(/^\s+|\s+$/g, ''); // trim
+    str = str.toLowerCase();
+
+    // remove accents, swap ñ for n, etc
+    var from = "ãàáäâẽèéëêìíïîõòóöôùúüûñç·/_,:;";
+    var to   = "aaaaaeeeeeiiiiooooouuuunc------";
+    for (var i=0, l=from.length ; i<l ; i++) {
+    str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+    }
+
+    str = str.replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+    .replace(/\s+/g, '-') // collapse whitespace and replace by -
+    .replace(/-+/g, '-'); // collapse dashes
+
+    return str;
 };
 
 function setSize(src, width, height, el) {
@@ -109,10 +136,10 @@ function setSplit() {
                 splity = splity_target;
 
             left.style.width = splitx + "px";
-            lefttext.style.right = (offset.width - splitx) + "px";
-            lefttext.style.bottom = (offset.height - splity) + "px";
-            righttext.style.left = (splitx + 1) + "px";
-            righttext.style.bottom = (offset.height - splity) + "px";
+            leftText.style.right = (offset.width - splitx) + "px";
+            leftText.style.bottom = (offset.height - splity) + "px";
+            rightText.style.left = (splitx + 1) + "px";
+            rightText.style.bottom = (offset.height - splity) + "px";
 
             if (splitx == splitx_target && splity == splity_target) {
                 clearInterval(timer);
@@ -233,46 +260,57 @@ function setImage(container, name, codec, side) {
         }
 
         if (side == "right") {
-            righttext.innerHTML = "&rarr;&nbsp;" + kbytes;
+            rightText.innerHTML = "&rarr;&nbsp;" + kbytes;
         } else if (side == "left") {
-            lefttext.innerHTML = kbytes + "&nbsp;&larr;";
-            textheight = lefttext.offsetHeight;
+            leftText.innerHTML = kbytes + "&nbsp;&larr;";
+            textheight = leftText.offsetHeight;
         };
     };
     xhr.send();
 }
 
-function set_left() {
+function setLeft() {
     var quality = '';
-    var image = leftsel.options[leftsel.selectedIndex].getAttribute("value");
-    var name = leftsel.options[leftsel.selectedIndex].innerHTML;
+    var image = leftSel.options[leftSel.selectedIndex].getAttribute("value");
+    var name = leftSel.options[leftSel.selectedIndex].innerHTML;
 
     if (name != 'Original') {
-        quality = leftqual.options[leftqual.selectedIndex].innerHTML.toLowerCase() + '/';
-    }
+        quality = leftQual.options[leftQual.selectedIndex].innerHTML.toLowerCase() + '/';
+    } else quality = '';
     name = quality + name;
+    viewOptions[1] = image;
+    viewOptions[2] = leftQual.options[leftQual.selectedIndex].getAttribute("value");
 
     setImage(left, name, image, 'left');
+    window.location.hash = viewOptions[0].concat('&',viewOptions[1],'=',viewOptions[2],
+                                                 '&',viewOptions[3],'=',viewOptions[4]);
 }
 
-function set_right() {
+function setRight() {
     var quality = '';
-    var image = rightsel.options[rightsel.selectedIndex].getAttribute("value");
-    var name = rightsel.options[rightsel.selectedIndex].innerHTML;
+    var image = rightSel.options[rightSel.selectedIndex].getAttribute("value");
+    var name = rightSel.options[rightSel.selectedIndex].innerHTML;
 
     if (name != 'Original') {
-        quality = rightqual.options[rightqual.selectedIndex].innerHTML.toLowerCase() + '/';
+        quality = rightQual.options[rightQual.selectedIndex].innerHTML.toLowerCase() + '/';
     }
     name = quality + name;
+    viewOptions[3] = image;
+    viewOptions[4] = rightQual.options[rightQual.selectedIndex].getAttribute("value");
 
     setImage(right, name, image, 'right');
+    window.location.hash = viewOptions[0].concat('&',viewOptions[1],'=',viewOptions[2],
+                                                 '&',viewOptions[3],'=',viewOptions[4]);
 }
 
-function set_file() {
+function setFile() {
     urlfile = filesel.options[filesel.selectedIndex].getAttribute("value");
+
     first = 1;
-    set_right();
-    set_left();
+    viewOptions[0] = slug(filesel.options[filesel.selectedIndex].text);
+
+    setRight();
+    setLeft();
 }
 
 function movesplit(event) {
@@ -292,19 +330,48 @@ function movesplit(event) {
 function sticksplit(event) {
     stick = !stick;
     if (!stick) {
-        righttext.style.backgroundColor = "rgba(0,0,0,.4)";
-        lefttext.style.backgroundColor = "rgba(0,0,0,.4)";
+        rightText.style.backgroundColor = "rgba(0,0,0,.4)";
+        leftText.style.backgroundColor = "rgba(0,0,0,.4)";
         movesplit(event);
     } else {
-        righttext.style.backgroundColor = "rgba(0,0,0,0)";
-        lefttext.style.backgroundColor = "rgba(0,0,0,0)";
+        rightText.style.backgroundColor = "rgba(0,0,0,0)";
+        leftText.style.backgroundColor = "rgba(0,0,0,0)";
     }
 }
 
-set_file();
+function getWindowsOptions() {
+    if (window.location.hash) {
+        var hashArray = (location.hash+'&='+'&=').split('&', 5);
+        var leftOpts = hashArray[1].split('=', 2);
+        var rightOpts = hashArray[2].split('=', 2);
+        var imageSet = filesel.options;
+        for (var opt, j = 0; opt = imageSet[j]; j++) {
+            if (slug(opt.text) == hashArray[0].substring(1)) {
+                filesel.selectedIndex = j;
+                var s, q;
+                if (leftOpts) {
+                    s = document.querySelector('#leftSel [value="' + leftOpts[0] + '"]');
+                    if (s) {s.selected = true}
+                    q = document.querySelector('#leftQual [value="' + leftOpts[1] + '"]');
+                    if (q) {q.selected = true}
+                }
+                if (rightOpts) {
+                    s = document.querySelector('#rightSel [value="' + rightOpts[0] + '"]');
+                    if (s) {s.selected = true}
+                    q = document.querySelector('#rightQual [value="' + rightOpts[1] + '"]');
+                    if (q) {q.selected = true}
+                }
+                break;
+            }
+        }
+    }
+}
+
+getWindowsOptions();
+setFile();
 
 setSplit();
 right.addEventListener("mousemove", movesplit, false);
 right.addEventListener("click", movesplit, false);
-righttext.style.backgroundColor = "rgba(0,0,0,.3)";
-lefttext.style.backgroundColor = "rgba(0,0,0,.3)";
+rightText.style.backgroundColor = "rgba(0,0,0,.3)";
+leftText.style.backgroundColor = "rgba(0,0,0,.3)";

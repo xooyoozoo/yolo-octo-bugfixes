@@ -5,8 +5,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" title="default demosheet" media="screen" href="demo.css" type="text/css" />
     <title>BPG Image Comparison</title>
-    <script type="text/javascript" defer src="js/bpgdec-0.9.2.js"></script>
-    <script type="text/javascript">
+    <script defer src="js/bpgdec-0.9.2.js"></script>
+    <script>
     (function() {
         var WebP = new Image();
         WebP.onload = WebP.onerror = function() {
@@ -22,7 +22,7 @@
         WebP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
     })();
     </script>
-    <script type="text/javascript" defer src="js/splitimage2.js"></script>
+    <script defer src="js/splitimage2.js"></script>
 </head>
 
 <body style="max-width: 100%;">
@@ -87,45 +87,45 @@
             </tr>
             <tr>
                 <td class="title" style="width:40%;padding-left:1em;text-align:right;">
-                    <select id="leftsel" style="font-size: 1.1em;">
+                    <select id="leftSel" style="font-size: 1.1em;">
                         <option value="bpg">BPG-x265</option>
                         <option value="jpg" selected>Mozjpeg</option>
                         <option value="jp2">JP2K-Kakadu</option>
                         <option value="webp">WebP</option>
                         <option value="png">Original</option>
                     </select>
-                    <select id="leftqual" style="font-size: 1.1em;">
-                        <option>Large</option>
-                        <option>Medium</option>
-                        <option selected>Small</option>
-                        <option>Tiny</option>
+                    <select id="leftQual" style="font-size: 1.1em;">
+                        <option value="l">Large</option>
+                        <option value="m">Medium</option>
+                        <option value="s" selected>Small</option>
+                        <option value="t">Tiny</option>
                     </select>
                 </td>
                 <td class="title">
                     --- vs ---
                 </td>
                 <td class="title" style="width:40%;padding-right:1em;text-align:left;">
-                    <select id="rightsel" style="font-size: 1.1em;">
+                    <select id="rightSel" style="font-size: 1.1em;">
                         <option value="bpg" selected>BPG-x265</option>
                         <option value="jpg">Mozjpeg</option>
                         <option value="jp2">JP2K-Kakadu</option>
                         <option value="webp">WebP</option>
                         <option value="png">Original</option>
                     </select>
-                    <select id="rightqual" style="font-size: 1.1em;">
-                        <option>Large</option>
-                        <option>Medium</option>
-                        <option selected>Small</option>
-                        <option>Tiny</option>
+                    <select id="rightQual" style="font-size: 1.1em;">
+                        <option value="l">Large</option>
+                        <option value="m">Medium</option>
+                        <option value="s" selected>Small</option>
+                        <option value="t">Tiny</option>
                     </select>
                 </td>
             </tr>
             <tr>
                 <td colspan=3 style="padding: .5em;padding-bottom: 2em;">
-                    <div id="rightcontainer" style="margin-left: auto; margin-right: auto; position: relative; width:800px; height:800px;">
-                        <div id="leftcontainer" style="border-right: 1px dotted white; width:800px; height:800px;"></div>
-                        <div id="lefttext" style="position: absolute; color: white; padding:.2em .5em .2em .5em;"></div>
-                        <div id="righttext" style="position: absolute; color: white; padding:.2em .5em .2em .5em;"></div>
+                    <div id="rightContainer" style="margin-left: auto; margin-right: auto; position: relative; width:800px; height:800px;">
+                        <div id="leftContainer" style="border-right: 1px dotted white; width:800px; height:800px;"></div>
+                        <div id="leftText" style="position: absolute; color: white; padding:.2em .5em .2em .5em;"></div>
+                        <div id="rightText" style="position: absolute; color: white; padding:.2em .5em .2em .5em;"></div>
                     </div>
                 </td>
             </tr>
