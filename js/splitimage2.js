@@ -1,5 +1,5 @@
 (function() {
-    var cl = document.getElementById('filesel');
+    var cl = elId('filesel');
     var clTexts = new Array();
 
     for (i = 0; i < cl.length; i++) {
@@ -35,11 +35,15 @@ var jp2kWorker = null;
     jp2k.src = 'data:image/jp2;base64,AAAADGpQICANCocKAAAAFGZ0eXBqcDIgAAAAAGpwMiAAAAAtanAyaAAAABZpaGRyAAAABAAAAAQAAw8HAAAAAAAPY29scgEAAAAAABAAAABpanAyY/9P/1EALwAAAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAEAAAAAAAAAAAAAw8BAQ8BAQ8BAf9SAAwAAAABAQAEBAAB/1wABECA/5AACgAAAAAAGAAB/5PP/BAQFABcr4CA/9k=';
 })();
 
-var leftSel = document.getElementById('leftSel');
-var rightSel = document.getElementById('rightSel');
-var filesel = document.getElementById('filesel');
-var left = document.getElementById('leftContainer');
-var right = document.getElementById('rightContainer');
+function elId(id) {
+    return document.getElementById(id);
+}
+
+var leftSel = elId('leftSel');
+var rightSel = elId('rightSel');
+var filesel = elId('filesel');
+var left = elId('leftContainer');
+var right = elId('rightContainer');
 
 var viewOptions = [
     '', /* file */
@@ -59,8 +63,8 @@ var splitx_target = splitx;
 var splity_target = splity;
 var splitx1 = 0;
 var splity1 = 0;
-var leftText = document.getElementById('leftText');
-var rightText = document.getElementById('rightText');
+var leftText = elId('leftText');
+var rightText = elId('rightText');
 var urlfile;
 var stick = 0;
 var timer;
@@ -149,7 +153,7 @@ function setSplit() {
     }
 }
 
-function setImage(container, name, codec, side) {
+function setImage(container, name, codec, setText) {
     container.style.background = "gray";
     container.style.backgroundImage = "";
 
@@ -259,12 +263,7 @@ function setImage(container, name, codec, side) {
             image.src = blob_path;
         }
 
-        if (side == "right") {
-            rightText.innerHTML = "&rarr;&nbsp;" + kbytes;
-        } else if (side == "left") {
-            leftText.innerHTML = kbytes + "&nbsp;&larr;";
-            textheight = leftText.offsetHeight;
-        };
+        setText(kbytes);
     };
     xhr.send();
 }
@@ -281,7 +280,8 @@ function setLeft() {
     viewOptions[1] = image;
     viewOptions[2] = leftQual.options[leftQual.selectedIndex].getAttribute("value");
 
-    setImage(left, name, image, 'left');
+    setImage(left, name, image, function(kbytes) {leftText.innerHTML = kbytes + "&nbsp;&larr;";
+                                                  textheight = leftText.offsetHeight;});
     window.location.hash = viewOptions[0].concat('&',viewOptions[1],'=',viewOptions[2],
                                                  '&',viewOptions[3],'=',viewOptions[4]);
 }
@@ -298,7 +298,7 @@ function setRight() {
     viewOptions[3] = image;
     viewOptions[4] = rightQual.options[rightQual.selectedIndex].getAttribute("value");
 
-    setImage(right, name, image, 'right');
+    setImage(right, name, image, function(kbytes) {rightText.innerHTML = "&rarr;&nbsp;" + kbytes;});
     window.location.hash = viewOptions[0].concat('&',viewOptions[1],'=',viewOptions[2],
                                                  '&',viewOptions[3],'=',viewOptions[4]);
 }
