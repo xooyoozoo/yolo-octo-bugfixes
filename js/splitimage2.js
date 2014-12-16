@@ -1,41 +1,34 @@
 (function() {
-    var cl = elId('filesel');
-    var clTexts = new Array();
+    var file = document.getElementById('fileSel');
+    var fileTexts = new Array();
+    var selCandidates = new Array()
 
-    for (i = 0; i < cl.length; i++) {
-        clTexts[i] =
-            cl.options[i].text.toUpperCase() + "|=" +
-            cl.options[i].text + "|=" +
-            cl.options[i].value + "|=" +
-            cl.options[i].selected;
+    for (i = 0; i < file.length; i++) {
+        fileTexts[i] =
+            file.options[i].text.toUpperCase() + "|=" +
+            file.options[i].text + "|=" +
+            file.options[i].value + "|=" +
+            file.options[i].selected;
     }
-    clTexts.sort();
+    fileTexts.sort();
 
-    for (i = 0; i < cl.length; i++) {
-        var parts = clTexts[i].split('|=');
+    for (i = 0; i < file.length; i++) {
+        var parts = fileTexts[i].split('|=');
 
-        cl.options[i].text = parts[1];
-        cl.options[i].value = parts[2];
-        if (parts[3] == "true") {
-            cl.options[i].selected = true;
-        } else {
-            cl.options[i].selected = false;
-        }
+        file.options[i].text = parts[1];
+        file.options[i].value = parts[2];
+        if (parts[3] == "true") { selCandidates.push(file.options[i]); }
     }
-})(); // Dynamically alphabetize file selection list
+    file.multiple = false;
+    selCandidates[Math.floor(Math.random() * selCandidates.length)].selected = true;
+})(); // alphabetize, randomize
 
 var webpWorker = null;
 (function() {
     var WebP = new Image();
     WebP.onload = WebP.onerror = function() {
-        if (WebP.height != 2) {
+        if (WebP.height != 2 && typeof(Worker) !== "undefined") {
             webpWorker = new Worker('js/webpjs-0.0.2.worker.js');
-            /*var sc = document.createElement('script');
-            sc.type = 'text/javascript';
-            sc.async = true;
-            var s = document.head || document.getElementsByTagName('head')[0];
-            sc.src = 'js/webpjs-0.0.2.min.js';
-            s.insertBefore(sc, s.firstChild);*/
         }
     };
     WebP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
@@ -45,7 +38,7 @@ var jp2kWorker = null;
 (function() {
     var jp2k = new Image();
     jp2k.onerror = jp2k.load = function() {
-        if (!jp2k.width || jp2k.width === 0) {
+        if ((!jp2k.width || jp2k.width === 0) && typeof(Worker) !== "undefined") {
             jp2kWorker = new Worker('js/openjpeg.js');
         }
     };
@@ -56,7 +49,7 @@ function elId(id) {
     return document.getElementById(id);
 }
 
-var filesel = elId('filesel');
+var fileSel = elId('fileSel');
 var whichSel = [elId('leftSel'), elId('rightSel')];
 var whichSide = [elId('leftContainer'), elId('rightContainer')];
 
@@ -85,7 +78,7 @@ var timer;
 var textHeight = whichText[0].offsetHeight;
 var first = 1;
 
-filesel.onchange = function() {
+fileSel.onchange = function() {
     setFile();
 };
 whichSel[0].onchange = function() {
@@ -300,10 +293,10 @@ function setSide(side) {
 }
 
 function setFile() {
-    urlFile = filesel.options[filesel.selectedIndex].getAttribute("value");
+    urlFile = fileSel.options[fileSel.selectedIndex].getAttribute("value");
 
     first = 1;
-    viewOptions[0] = slug(filesel.options[filesel.selectedIndex].text);
+    viewOptions[0] = slug(fileSel.options[fileSel.selectedIndex].text);
 
     setSide('right');
     setSide('left');
@@ -328,10 +321,10 @@ function getWindowsOptions() {
         var hashArray = (location.hash+'&='+'&=').split('&', 5);
         var leftOpts = hashArray[1].split('=', 2);
         var rightOpts = hashArray[2].split('=', 2);
-        var imageSet = filesel.options;
+        var imageSet = fileSel.options;
         for (var opt, j = 0; opt = imageSet[j]; j++) {
             if (slug(opt.text) == hashArray[0].substring(1)) {
-                filesel.selectedIndex = j;
+                fileSel.selectedIndex = j;
                 var s, q;
                 if (leftOpts) {
                     s = document.querySelector('#leftSel [value="' + leftOpts[0] + '"]');
