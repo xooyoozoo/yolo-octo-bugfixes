@@ -5,6 +5,36 @@ self.onmessage = function(event) {
 
     self.postMessage(j2k);
 };
+/*
+ * Copyright (c) 2002-2007, Communications and Remote Sensing Laboratory, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2007, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux and Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 var H=void 0,I=!0,W=null,Y=!1;
 this.openjpeg=function(di,xb){function Pa(){}function ei(a){eval.call(W,a)}function yb(a){Pa(a+":\n"+Error().stack);throw"Assertion: "+a;}function J(a,d){a||yb("Assertion failed: "+d)}function Pc(c,d,e){e=e||"i8";"*"===e[e.length-1]&&(e="i32");switch(e){case "i1":s[c]=d;break;case "i8":s[c]=d;break;case "i16":v[c>>1]=d;break;case "i32":a[c>>2]=d;break;case "i64":a[c>>2]=d[0];a[c+4>>2]=d[1];break;case "float":w[c>>2]=d;break;case "double":ja[0]=d;a[c>>2]=S[0];a[c+4>>2]=S[1];break;default:yb("invalid type for setValue: "+
 e)}}function Tb(c,d){d=d||"i8";"*"===d[d.length-1]&&(d="i32");switch(d){case "i1":return s[c];case "i8":return s[c];case "i16":return v[c>>1];case "i32":return a[c>>2];case "i64":return[Q[c>>2],Q[c+4>>2]];case "float":return w[c>>2];case "double":return S[0]=a[c>>2],S[1]=a[c+4>>2],ja[0];default:yb("invalid type for setValue: "+d)}return W}function h(a,d,e){var b,f;"number"===typeof a?(b=I,f=a):(b=Y,f=a.length);e=[G,N.va,N.J][e===H?m:e](Math.max(f,1));for(var g="string"===typeof d?d:W,l=0,n;l<f;){var z=

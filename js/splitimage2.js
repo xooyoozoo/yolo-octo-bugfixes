@@ -28,7 +28,7 @@ var webpWorker = null;
     var WebP = new Image();
     WebP.onload = WebP.onerror = function() {
         if (WebP.height != 2 && typeof(Worker) !== "undefined") {
-            webpWorker = new Worker('js/webpjs-0.0.2.worker.js');
+            webpWorker = new Worker('js/webpjs-0.0.2.mod.js');
         }
     };
     WebP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
