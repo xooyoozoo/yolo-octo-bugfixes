@@ -269,13 +269,17 @@ function setImage(container, name, codec, setText) {
 }
 
 function setLeft() {
-    var quality = '';
     var image = leftSel.options[leftSel.selectedIndex].getAttribute("value");
     var name = leftSel.options[leftSel.selectedIndex].innerHTML;
 
     if (name != 'Original') {
-        quality = leftQual.options[leftQual.selectedIndex].innerHTML.toLowerCase() + '/';
-    } else quality = '';
+        leftQual.disabled=false;
+        var quality = leftQual.options[leftQual.selectedIndex].innerHTML.toLowerCase() + '/';
+    } else {
+        leftQual.disabled=true;
+        var quality = '';
+    }
+
     name = quality + name;
     viewOptions[1] = image;
     viewOptions[2] = leftQual.options[leftQual.selectedIndex].getAttribute("value");
@@ -287,13 +291,17 @@ function setLeft() {
 }
 
 function setRight() {
-    var quality = '';
     var image = rightSel.options[rightSel.selectedIndex].getAttribute("value");
     var name = rightSel.options[rightSel.selectedIndex].innerHTML;
 
     if (name != 'Original') {
+        rightQual.disabled=false;
         quality = rightQual.options[rightQual.selectedIndex].innerHTML.toLowerCase() + '/';
+    } else {
+        rightQual.disabled=true;
+        var quality = '';
     }
+
     name = quality + name;
     viewOptions[3] = image;
     viewOptions[4] = rightQual.options[rightQual.selectedIndex].getAttribute("value");
