@@ -1,3 +1,16 @@
+self.onmessage = function(event) {
+    var bytes = event.data;
+
+    var decoder = new WebPDecoder();
+    var config = decoder.WebPDecoderConfig;
+    var output_buffer = config.output;
+    var status = decoder.WebPGetFeatures(bytes, bytes.length, config.input);
+
+    output_buffer.colorspace = decoder.WEBP_CSP_MODE.MODE_ARGB;
+    status = decoder.WebPDecode(bytes, bytes.length, config);
+
+    self.postMessage({bitmap: output_buffer.u.RGBA.rgba, width: output_buffer.width, height: output_buffer.height});
+};
 var h='												\
 // Copyright 2011 Google Inc.									\
 //												\

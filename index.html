@@ -5,24 +5,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" title="default demosheet" media="screen" href="demo.css" type="text/css" />
     <title>BPG Image Comparison</title>
-    <script defer src="js/bpgdec-0.9.3.js"></script>
-    <script>
-    (function() {
-        var WebP = new Image();
-        WebP.onload = WebP.onerror = function() {
-            if (WebP.height != 2) {
-                var sc = document.createElement('script');
-                sc.type = 'text/javascript';
-                sc.defer = true;
-                var s = document.getElementsByTagName('script')[0];
-                sc.src = 'js/webpjs-0.0.2.min.js';
-                s.parentNode.insertBefore(sc, s.nextSibling);
-            }
-        };
-        WebP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
-    })();
-    </script>
-    <script defer src="js/splitimage2.js"></script>
+    <script async src="js/bpgdec-0.9.3.js"></script>
+    <script async src="js/splitimage2.js"></script>
 </head>
 
 <body style="max-width: 100%;">
