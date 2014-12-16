@@ -56,11 +56,15 @@
           margin-right: auto;
       }
       .demo table .title {
-          font-weight: bold;
-          font-size: 1.2em;
-          color: #203090;
           text-align: center;
       }
+      .demo table .center-head {
+          font-weight: bold;
+          font-family: "Courier New", Courier, monospace;
+          font-size: 1.5em;
+          text-align: center;
+          min-width: 12em;
+        }
       .demo .caption {
           margin: 1.5em 1em .2em 1em;
           padding-bottom: 2em;

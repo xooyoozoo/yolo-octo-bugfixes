@@ -65,18 +65,20 @@ var offset = {
     width: whichSide[1].getBoundingClientRect().width,
     height: whichSide[1].getBoundingClientRect().height
 };
-var splitx = offset.width * .5;
-var splity = offset.height * .5;
-var splitx_target = splitx;
-var splity_target = splity;
-var splitx1 = 0;
-var splity1 = 0;
+var splitX = offset.width * .5;
+var splitY = offset.height * .5;
+var splitXTarget = splitX;
+var splitYTarget = splitY;
+var splitXStep = 0;
+var splitYStep = 0;
 
+var centerHead = elId('center-head');
 var whichText = [elId('leftText'), elId('rightText')];
 var urlFile;
 var timer;
 var textHeight = whichText[0].offsetHeight;
 var first = 1;
+var splitMode = 1;
 
 fileSel.onchange = function() {
     setFile();
@@ -122,37 +124,38 @@ function setSize(src, width, height, el) {
             height: height
         };
         if (first) {
-            splitx = splitx_target = width * .5;
-            splity = splity_target = height * .5;
+            splitX = splitXTarget = width * .5;
+            splitY = splitYTarget = height * .5;
             first = 0;
         }
     }
+    switchMode();
     setSplit();
 }
 
 function setSplit() {
     if (!timer) {
         timer = setInterval(function() {
-            splitx1 *= .5;
-            splity1 *= .5;
-            splitx1 += (splitx_target - splitx) * .1;
-            splity1 += (splity_target - splity) * .1;
+            splitXStep *= .5;
+            splitYStep *= .5;
+            splitXStep += (splitXTarget - splitX) * .1;
+            splitYStep += (splitYTarget - splitY) * .1;
 
-            splitx += splitx1;
-            splity += splity1;
+            splitX += splitXStep;
+            splitY += splitYStep;
 
-            if (Math.abs(splitx - splitx_target) < .5)
-                splitx = splitx_target;
-            if (Math.abs(splity - splity_target) < .5)
-                splity = splity_target;
+            if (Math.abs(splitX - splitXTarget) < .5)
+                splitX = splitXTarget;
+            if (Math.abs(splitY - splitYTarget) < .5)
+                splitY = splitYTarget;
 
-            whichSide[0].style.width = splitx + "px";
-            whichText[0].style.right = (offset.width - splitx) + "px";
-            whichText[0].style.bottom = (offset.height - splity) + "px";
-            whichText[1].style.left = (splitx + 1) + "px";
-            whichText[1].style.bottom = (offset.height - splity) + "px";
+            whichSide[0].style.width = splitX + "px";
+            whichText[0].style.right = (offset.width - splitX) + "px";
+            whichText[0].style.bottom = (offset.height - splitY) + "px";
+            whichText[1].style.left = (splitX + 1) + "px";
+            whichText[1].style.bottom = (offset.height - splitY) + "px";
 
-            if (splitx == splitx_target && splity == splity_target) {
+            if (splitX == splitXTarget && splitY == splitYTarget) {
                 clearInterval(timer);
                 timer = null;
             }
@@ -303,17 +306,42 @@ function setFile() {
 }
 
 function movesplit(event) {
-    if (urlFile) {
+    if (splitMode && urlFile) {
         var offset = whichSide[1].getBoundingClientRect();
-        splitx_target = event.clientX - offset.left;
-        splity_target = event.clientY - offset.top;
-        if (splitx_target < 0) splitx_target = 0;
-        if (splity_target < textHeight) splity_target = textHeight;
-        if (splitx_target >= offset.width) splitx_target = offset.width - 1;
-        if (splity_target >= offset.height) splity_target = offset.height - 1;
+        splitXTarget = event.clientX - offset.left;
+        splitYTarget = event.clientY - offset.top;
+        if (splitXTarget < 0) splitXTarget = 0;
+        if (splitYTarget < textHeight) splitYTarget = textHeight;
+        if (splitXTarget >= offset.width) splitXTarget = offset.width - 1;
+        if (splitYTarget >= offset.height) splitYTarget = offset.height - 1;
         setSplit();
     }
     return false;
+}
+
+function switchMode(event) {
+    var keyCode = (event) ? event.keyCode : 0;
+    if (keyCode == "16") {
+        splitMode = 0;
+        //var focusLeft = (left.offsetWidth > 1); // is focus on left currently
+        var currLeft = (whichSide[0].offsetWidth > 1) ? 1 : 0; // current focus
+
+        //whichSel = (focusLeft) ? rightSel : leftSel;
+        //whichText = (focusLeft) ? rightText : leftText;
+        centerHead.innerHTML = whichSel[currLeft].options[whichSel[currLeft].selectedIndex].getAttribute("value")
+                          + ' ' + whichText[currLeft].innerHTML.replace(/&nbsp;/g, '').replace(/←|→/g, '');
+
+        whichSide[0].style.borderRight = "none";
+        whichSide[0].style.width = (offset.width * (1-currLeft) * 0.99) + "px";
+    } else if (!splitMode) {
+        whichSide[0].style.borderRight = "1px dotted white";
+        whichSide[0].style.width = splitX + "px";
+        centerHead.innerHTML = "--- vs ---";
+        splitMode = 1;
+    }
+
+    whichText[0].style.opacity = splitMode;
+    whichText[1].style.opacity = splitMode;
 }
 
 function getWindowsOptions() {
@@ -347,8 +375,10 @@ function getWindowsOptions() {
 getWindowsOptions();
 
 window.addEventListener("load", function() {setFile();}, false);
+window.addEventListener("keydown", switchMode, false);
 
 whichSide[1].addEventListener("mousemove", movesplit, false);
 whichSide[1].addEventListener("click", movesplit, false);
+
 whichText[1].style.backgroundColor = "rgba(0,0,0,.3)";
 whichText[0].style.backgroundColor = "rgba(0,0,0,.3)";
