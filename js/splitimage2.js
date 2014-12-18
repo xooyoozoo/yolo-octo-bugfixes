@@ -50,7 +50,7 @@ function elId(id) {
 }
 
 var fileSel = elId('fileSel');
-var whichSel = [elId('leftSel'), elId('rightSel')];
+var whichSel = [elId('leftSel'), elId('rightSel'), elId('scaling')];
 var whichSide = [elId('leftContainer'), elId('rightContainer')];
 
 var viewOptions = [
@@ -81,6 +81,7 @@ var first = 1;
 var splitMode = 1;
 
 fileSel.onchange = function() {
+    whichSel[2].options[2].selected = true;
     setFile();
 };
 whichSel[0].onchange = function() {
@@ -89,6 +90,8 @@ whichSel[0].onchange = function() {
 whichSel[1].onchange = function() {
     setSide('right');
 };
+whichSel[2].onchange = setFile;
+
 leftQual.onchange = function() {
     setSide('left');
 };
@@ -114,9 +117,32 @@ var slug = function(str) {
     return str;
 };
 
+function processCanvasSize(inCanvas, width, height, el) {
+    var scale = whichSel[2].options[whichSel[2].selectedIndex].getAttribute("value");
+    if ( scale == 1 ) {
+        return setSize(inCanvas.toDataURL(), width, height, el); // no resize needed
+    }
+
+    var outCanvas = document.createElement("canvas");
+    outCanvas.width = Math.round(width*scale);
+    outCanvas.height = Math.round(height*scale);
+
+    window.pica.WW = false;
+    window.pica.resizeCanvas(inCanvas, outCanvas,
+        { quality: 3, alpha: false, unsharpAmount: 0, unsharpThreshold: 0, transferable: false },
+        function (err) { console.log('Error', err); }
+    )
+
+    setSize(outCanvas.toDataURL(), outCanvas.width, outCanvas.height, el);
+}
+
 function setSize(src, width, height, el) {
+    if (first) {
+        whichSide[0].style.height = height + "px";
+        whichSide[1].style.height = height + "px";
+    } else el.style.height = height + "px";
+
     el.style.width = width + "px";
-    el.style.height = height + "px";
     el.style.backgroundImage = 'url(\"' + src + '\")';
     if (el == whichSide[1]) {
         offset = {
@@ -175,6 +201,8 @@ function setImage(container, name, codec, setText) {
 
     xhr.onload = function() {
         var kbytes = (xhr.response.byteLength / 1024).toFixed(1) + " KB";
+        setText(kbytes);
+
         var blob = new Blob([xhr.response], {
             type: "image/" + codec
         });
@@ -189,14 +217,17 @@ function setImage(container, name, codec, setText) {
                 canvas.width = this.imageData.width;
                 canvas.height = this.imageData.height;
                 ctx.putImageData(this.imageData, 0, 0);
-                setSize(canvas.toDataURL(), canvas.width, canvas.height, container);
+                processCanvasSize(canvas, canvas.width, canvas.height, container);
             };
             image.load(blob_path);
         } else {
             var image = new Image();
 
             image.onload = function() {
-                setSize(image.src, image.width, image.height, container)
+                canvas.width = image.width;
+                canvas.height = image.height;
+                ctx.drawImage(image, 0, 0);
+                processCanvasSize(canvas, image.width, image.height, container);
             };
             image.onerror = function() {
                 var int_data = new Uint8Array(xhr.response);
@@ -223,7 +254,7 @@ function setImage(container, name, codec, setText) {
                             };
                         };
                         ctx.putImageData(output, 0, 0);
-                        setSize(canvas.toDataURL("image/png"), canvas.width, canvas.height, container);
+                        processCanvasSize(canvas, canvas.width, canvas.height, container);
                     };
                     if (webpWorker) { webpWorker.postMessage(int_data); }
                 } else if (codec == 'jp2') {
@@ -247,7 +278,7 @@ function setImage(container, name, codec, setText) {
                             j += 1;
                         };
                         ctx.putImageData(output, 0, 0);
-                        setSize(canvas.toDataURL("image/png"), canvas.width, canvas.height, container);
+                        processCanvasSize(canvas, canvas.width, canvas.height, container);
                     };
                     if (jp2kWorker) {
                         jp2kWorker.postMessage({
@@ -262,8 +293,6 @@ function setImage(container, name, codec, setText) {
             };
             image.src = blob_path;
         }
-
-        setText(kbytes);
     };
     xhr.send();
 }
@@ -323,16 +352,13 @@ function switchMode(event) {
     var keyCode = (event) ? event.keyCode : 0;
     if (keyCode == "16") {
         splitMode = 0;
-        //var focusLeft = (left.offsetWidth > 1); // is focus on left currently
         var currLeft = (whichSide[0].offsetWidth > 1) ? 1 : 0; // current focus
 
-        //whichSel = (focusLeft) ? rightSel : leftSel;
-        //whichText = (focusLeft) ? rightText : leftText;
         centerHead.innerHTML = whichSel[currLeft].options[whichSel[currLeft].selectedIndex].getAttribute("value")
                           + ' ' + whichText[currLeft].innerHTML.replace(/&nbsp;/g, '').replace(/←|→/g, '');
 
         whichSide[0].style.borderRight = "none";
-        whichSide[0].style.width = (offset.width * (1-currLeft) * 0.99) + "px";
+        whichSide[0].style.width = (offset.width * (1-currLeft) * 0.99999) + "px";
     } else if (!splitMode) {
         whichSide[0].style.borderRight = "1px dotted white";
         whichSide[0].style.width = splitX + "px";
