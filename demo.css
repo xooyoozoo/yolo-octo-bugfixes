@@ -63,7 +63,7 @@
           font-family: "Courier New", Courier, monospace;
           font-size: 1.5em;
           text-align: center;
-          min-width: 12em;
+          width: 8em;
         }
       .demo .caption {
           margin: 1.5em 1em .2em 1em;

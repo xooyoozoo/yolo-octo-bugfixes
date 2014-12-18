@@ -23,7 +23,7 @@
     selCandidates[Math.floor(Math.random() * selCandidates.length)].selected = true;
 })(); // alphabetize, randomize
 
-var webpWorker = null;
+var webpWorker;
 (function() {
     var WebP = new Image();
     WebP.onload = WebP.onerror = function() {
@@ -34,7 +34,7 @@ var webpWorker = null;
     WebP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
 })();
 
-var jp2kWorker = null;
+var jp2kWorker;
 (function() {
     var jp2k = new Image();
     jp2k.onerror = jp2k.load = function() {
@@ -50,7 +50,8 @@ function elId(id) {
 }
 
 var fileSel = elId('fileSel');
-var whichSel = [elId('leftSel'), elId('rightSel'), elId('scaling')];
+var scaleSel = elId('scaling');
+var whichSel = [elId('leftSel'), elId('rightSel')];
 var whichSide = [elId('leftContainer'), elId('rightContainer')];
 
 var viewOptions = [
@@ -65,12 +66,12 @@ var offset = {
     width: whichSide[1].getBoundingClientRect().width,
     height: whichSide[1].getBoundingClientRect().height
 };
-var splitX = offset.width * .5;
-var splitY = offset.height * .5;
-var splitXTarget = splitX;
-var splitYTarget = splitY;
-var splitXStep = 0;
-var splitYStep = 0;
+var split = {
+    x: 0.5 * offset.width,
+    y: 0.5 * offset.height
+};
+var splitTarget = {x: split.x, y: split.y};
+var splitStep = {x: 0, y: 0};
 
 var centerHead = elId('center-head');
 var whichText = [elId('leftText'), elId('rightText')];
@@ -81,16 +82,26 @@ var first = 1;
 var splitMode = 1;
 
 fileSel.onchange = function() {
-    whichSel[2].options[2].selected = true;
+    if (first != 1) {
+        if (typeof webpWorker !== "undefined") {
+            console.log('webp terminated');
+            webpWorker = new Worker('js/webpjs-0.0.2.mod.js');
+        };
+        if (typeof jp2kWorker !== "undefined") {
+            jp2kWorker.terminate();
+            jp2kWorker = new Worker('js/openjpeg.js');
+        };
+    }
+    scaleSel.options[2].selected = true;
     setFile();
 };
+scaleSel.onchange = setFile;
 whichSel[0].onchange = function() {
     setSide('left');
 };
 whichSel[1].onchange = function() {
     setSide('right');
 };
-whichSel[2].onchange = setFile;
 
 leftQual.onchange = function() {
     setSide('left');
@@ -118,7 +129,7 @@ var slug = function(str) {
 };
 
 function processCanvasSize(inCanvas, width, height, el) {
-    var scale = whichSel[2].options[whichSel[2].selectedIndex].getAttribute("value");
+    var scale = scaleSel.options[scaleSel.selectedIndex].getAttribute("value");
     if ( scale == 1 ) {
         return setSize(inCanvas.toDataURL(), width, height, el); // no resize needed
     }
@@ -129,8 +140,8 @@ function processCanvasSize(inCanvas, width, height, el) {
 
     window.pica.WW = false;
     window.pica.resizeCanvas(inCanvas, outCanvas,
-        { quality: 3, alpha: false, unsharpAmount: 0, unsharpThreshold: 0, transferable: false },
-        function (err) { console.log('Error', err); }
+        { quality: 2, alpha: false, unsharpAmount: 0, unsharpThreshold: 0, transferable: false },
+        function (err) { return; }
     )
 
     setSize(outCanvas.toDataURL(), outCanvas.width, outCanvas.height, el);
@@ -150,8 +161,8 @@ function setSize(src, width, height, el) {
             height: height
         };
         if (first) {
-            splitX = splitXTarget = width * .5;
-            splitY = splitYTarget = height * .5;
+            split.x = splitTarget.x = width * .5;
+            split.y = splitTarget.y = height * .5;
             first = 0;
         }
     }
@@ -162,26 +173,26 @@ function setSize(src, width, height, el) {
 function setSplit() {
     if (!timer) {
         timer = setInterval(function() {
-            splitXStep *= .5;
-            splitYStep *= .5;
-            splitXStep += (splitXTarget - splitX) * .1;
-            splitYStep += (splitYTarget - splitY) * .1;
+            splitStep.x *= .5;
+            splitStep.y *= .5;
+            splitStep.x += (splitTarget.x - split.x) * .1;
+            splitStep.y += (splitTarget.y - split.y) * .1;
 
-            splitX += splitXStep;
-            splitY += splitYStep;
+            split.x += splitStep.x;
+            split.y += splitStep.y;
 
-            if (Math.abs(splitX - splitXTarget) < .5)
-                splitX = splitXTarget;
-            if (Math.abs(splitY - splitYTarget) < .5)
-                splitY = splitYTarget;
+            if (Math.abs(split.x - splitTarget.x) < .5)
+                split.x = splitTarget.x;
+            if (Math.abs(split.y - splitTarget.y) < .5)
+                split.y = splitTarget.y;
 
-            whichSide[0].style.width = splitX + "px";
-            whichText[0].style.right = (offset.width - splitX) + "px";
-            whichText[0].style.bottom = (offset.height - splitY) + "px";
-            whichText[1].style.left = (splitX + 1) + "px";
-            whichText[1].style.bottom = (offset.height - splitY) + "px";
+            whichSide[0].style.width = split.x + "px";
+            whichText[0].style.right = (offset.width - split.x) + "px";
+            whichText[0].style.bottom = (offset.height - split.y) + "px";
+            whichText[1].style.left = (split.x + 1) + "px";
+            whichText[1].style.bottom = (offset.height - split.y) + "px";
 
-            if (splitX == splitXTarget && splitY == splitYTarget) {
+            if (split.x == splitTarget.x && split.y == splitTarget.y) {
                 clearInterval(timer);
                 timer = null;
             }
@@ -256,7 +267,7 @@ function setImage(container, name, codec, setText) {
                         ctx.putImageData(output, 0, 0);
                         processCanvasSize(canvas, canvas.width, canvas.height, container);
                     };
-                    if (webpWorker) { webpWorker.postMessage(int_data); }
+                    if (typeof webpWorker !== "undefined") { webpWorker.postMessage(int_data); }
                 } else if (codec == 'jp2') {
                     jp2kWorker.onmessage = function(event) {
                         var bitmap = event.data;
@@ -280,7 +291,7 @@ function setImage(container, name, codec, setText) {
                         ctx.putImageData(output, 0, 0);
                         processCanvasSize(canvas, canvas.width, canvas.height, container);
                     };
-                    if (jp2kWorker) {
+                    if (typeof jp2kWorker !== "undefined") {
                         jp2kWorker.postMessage({
                             bytes: int_data,
                             extension: codec
@@ -337,12 +348,12 @@ function setFile() {
 function movesplit(event) {
     if (splitMode && urlFile) {
         var offset = whichSide[1].getBoundingClientRect();
-        splitXTarget = event.clientX - offset.left;
-        splitYTarget = event.clientY - offset.top;
-        if (splitXTarget < 0) splitXTarget = 0;
-        if (splitYTarget < textHeight) splitYTarget = textHeight;
-        if (splitXTarget >= offset.width) splitXTarget = offset.width - 1;
-        if (splitYTarget >= offset.height) splitYTarget = offset.height - 1;
+        splitTarget.x = event.clientX - offset.left;
+        splitTarget.y = event.clientY - offset.top;
+        if (splitTarget.x < 0) splitTarget.x = 0;
+        if (splitTarget.y < textHeight) splitTarget.y = textHeight;
+        if (splitTarget.x >= offset.width) splitTarget.x = offset.width - 1;
+        if (splitTarget.y >= offset.height) splitTarget.y = offset.height - 1;
         setSplit();
     }
     return false;
@@ -361,7 +372,7 @@ function switchMode(event) {
         whichSide[0].style.width = (offset.width * (1-currLeft) * 0.99999) + "px";
     } else if (!splitMode) {
         whichSide[0].style.borderRight = "1px dotted white";
-        whichSide[0].style.width = splitX + "px";
+        whichSide[0].style.width = split.x + "px";
         centerHead.innerHTML = "--- vs ---";
         splitMode = 1;
     }
