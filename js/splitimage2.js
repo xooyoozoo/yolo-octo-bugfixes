@@ -155,6 +155,8 @@ function setSize(src, width, height, el) {
 
     el.style.width = width + "px";
     el.style.backgroundImage = 'url(\"' + src + '\")';
+    el.style.backgroundColor = "";
+    el.style.opacity = 1;
     if (el == whichSide[1]) {
         offset = {
             width: width,
@@ -201,8 +203,11 @@ function setSplit() {
 }
 
 function setImage(container, name, codec, setText) {
-    container.style.background = "gray";
-    container.style.backgroundImage = "";
+    if ( container == whichSide[0] || first ) {
+        container.style.backgroundColor = "black";
+        container.style.backgroundImage = "";
+    };
+    container.style.opacity = 0.5;
 
     var path = 'comparisonfiles/'.concat(name, '/', urlFile, '.', codec);
     var xhr = new XMLHttpRequest();
