@@ -1,7 +1,5 @@
 self.onmessage = function(event) {
-    var bytes = event.data.bytes,
-        extension = event.data.extension;
-    var j2k = openjpeg(bytes, extension);
+    var j2k = openjpeg(event.data.bytes, event.data.extension);
 
     self.postMessage(j2k);
 };
