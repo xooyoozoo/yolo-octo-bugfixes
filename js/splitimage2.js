@@ -104,7 +104,7 @@ function getSelValue(el) {
     return el.options[el.selectedIndex].getAttribute("value");
 }
 
-function slug(str) {
+function getSlugName(str) {
     str = str.replace(/^\s+|\s+$/g, ''); // trim
     str = str.toLowerCase();
 
@@ -238,7 +238,7 @@ function setImage(container, name, codec, setText) {
         var blob = new Blob([xhr.response], {
             type: "image/" + codec
         });
-        var blob_path = URL.createObjectURL(blob);
+        var blobPath = URL.createObjectURL(blob);
 
         var canvas = document.createElement("canvas");
         var image = new Image();
@@ -250,7 +250,7 @@ function setImage(container, name, codec, setText) {
             processCanvasSize(canvas, image.width, image.height, container);
         };
         image.onerror = function() {
-            var int_data = new Uint8Array(xhr.response);
+            var arrayData = new Uint8Array(xhr.response);
             var output = null;
             if (codec == 'bpg') {
                 var bpg = new BPGDecoder(canvas.getContext("2d"));
@@ -260,17 +260,17 @@ function setImage(container, name, codec, setText) {
                     canvas.getContext("2d").putImageData(bpg.imageData, 0, 0);
                     processCanvasSize(canvas, canvas.width, canvas.height, container);
                 };
-                bpg.load(blob_path);
+                bpg.load(blobPath);
             } else if (codec == 'webp') {
-                webpArrayToCanvas(int_data, canvas, container);
+                webpArrayToCanvas(arrayData, canvas, container);
             } else if (codec == 'jp2' || codec == 'j2k') {
-                j2kArrayToCanvas(int_data, codec, canvas, container);
+                j2kArrayToCanvas(arrayData, codec, canvas, container);
             } else {
                 console.error("No support for " + url);
                 return false;
             }
         };
-        image.src = blob_path;
+        image.src = blobPath;
     };
     xhr.send();
 }
@@ -367,13 +367,13 @@ function setFile() {
     urlFile = getSelValue(fileSel);
 
     first = 1;
-    viewOptions[0] = slug(fileSel.options[fileSel.selectedIndex].text);
+    viewOptions[0] = getSlugName(fileSel.options[fileSel.selectedIndex].text);
 
     setSide('right');
     setSide('left');
 }
 
-function movesplit(event) {
+function moveSplit(event) {
     if (splitMode && urlFile) {
         var offset = whichSide[1].getBoundingClientRect();
         splitTarget.x = event.clientX - offset.left;
@@ -416,7 +416,7 @@ function getWindowsOptions() {
         var rightOpts = hashArray[2].split('=', 2);
         var imageSet = fileSel.options;
         for (var opt, j = 0; opt = imageSet[j]; j++) {
-            if (slug(opt.text) == hashArray[0].substring(1)) {
+            if (getSlugName(opt.text) == hashArray[0].substring(1)) {
                 fileSel.selectedIndex = j;
                 var s, q;
                 if (leftOpts) {
@@ -444,8 +444,8 @@ getWindowsOptions();
 window.addEventListener("load", function() {setFile();}, false);
 window.addEventListener("keydown", switchMode, false);
 
-whichSide[1].addEventListener("mousemove", movesplit, false);
-whichSide[1].addEventListener("click", movesplit, false);
+whichSide[1].addEventListener("mousemove", moveSplit, false);
+whichSide[1].addEventListener("click", moveSplit, false);
 
 whichText[1].style.backgroundColor = "rgba(0,0,0,.3)";
 whichText[0].style.backgroundColor = "rgba(0,0,0,.3)";
