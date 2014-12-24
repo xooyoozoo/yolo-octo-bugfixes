@@ -27,7 +27,7 @@ var jp2Worker;
 var jp2Decoder = 0;
 (function() {
     var jp2 = new Image();
-    jp2.onerror = jp2.load = function() {
+    jp2.onload = jp2.onerror = function() {
         if (jp2.width && jp2.width !== 0) { jp2Decoder = 1; }
     };
     jp2.src = 'data:image/jp2;base64,AAAADGpQICANCocKAAAAFGZ0eXBqcDIgAAAAAGpwMiAAAAAtanAyaAAAABZpaGRyAAAABAAAAAQAAw8HAAAAAAAPY29scgEAAAAAABAAAABpanAyY/9P/1EALwAAAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAEAAAAAAAAAAAAAw8BAQ8BAQ8BAf9SAAwAAAABAQAEBAAB/1wABECA/5AACgAAAAAAGAAB/5PP/BAQFABcr4CA/9k=';
@@ -110,8 +110,8 @@ function getElId(id) {
     return document.getElementById(id);
 }
 
-function getSelValue(el) {
-    return el.options[el.selectedIndex].getAttribute("value");
+function getSelValue(el, attr) {
+    return el.options[el.selectedIndex].getAttribute(attr);
 }
 
 /* Get web-friendly string */
@@ -135,9 +135,9 @@ function getSlugName(str) {
 
 /* Create new worker if needed. Terminate worker if unneeded. */
 function checkWorkers(selIdx) {
-    var curSel = getSelValue(whichSel[selIdx]);
-    var img = { l: getSelValue(whichSel[0]),
-                r: getSelValue(whichSel[1]) };
+    var curSel = getSelValue(whichSel[selIdx], 'value');
+    var img = { l: getSelValue(whichSel[0], 'value'),
+                r: getSelValue(whichSel[1], 'value') };
 
     processWorker('jp2');
     processWorker('jxr');
@@ -159,7 +159,7 @@ function checkWorkers(selIdx) {
 
 /* Uses Lanczos2 for rescaling. In-browser too blurry. Lanczos3 too slow. */
 function processCanvasSize(inCanvas, width, height, el) {
-    var scale = getSelValue(scaleSel);
+    var scale = getSelValue(scaleSel, 'value');
     if ( scale == 1 ) {
         return setSize(inCanvas.toDataURL(), width, height, el); // no resize needed
     }
@@ -232,14 +232,14 @@ function setSplit() {
     }
 }
 
-function setImage(container, name, codec, setText) {
+function setImage(container, pathBase, codec, setText) {
     if ( container == whichSide[0] || first ) {
         container.style.backgroundColor = "#c6c6c6";
         container.style.backgroundImage = "";
     };
     container.style.opacity = 0.5;
 
-    var path = 'comparisonfiles/'.concat(name, '/', urlFile, '.', codec);
+    var path = 'comparisonfiles/'.concat(pathBase, '/', urlFile, '.', codec);
     var xhr = new XMLHttpRequest();
 
     xhr.open("GET", path, true);
@@ -252,80 +252,69 @@ function setImage(container, name, codec, setText) {
         var blob = new Blob([xhr.response], {
             type: "image/" + codec
         });
-        var blobPath = URL.createObjectURL(blob);
+        var blobPath = window.URL.createObjectURL(blob);
 
         var canvas = document.createElement("canvas");
         var image = new Image();
 
-        image.onload = function() {
-            canvas.width = image.width;
-            canvas.height = image.height;
-            canvas.getContext("2d").drawImage(image, 0, 0);
-            processCanvasSize(canvas, image.width, image.height, container);
-        };
-        image.onerror = function() {
-            var arrayData = new Uint8Array(xhr.response);
-            var output = null;
-            if (codec == 'bpg') {
-                var bpg = new BPGDecoder(canvas.getContext("2d"));
-                bpg.onload = function() {
-                    canvas.width = bpg.imageData.width;
-                    canvas.height = bpg.imageData.height;
-                    canvas.getContext("2d").putImageData(bpg.imageData, 0, 0);
-                    processCanvasSize(canvas, canvas.width, canvas.height, container);
-                };
-                bpg.load(blobPath);
-            } else if (codec == 'jp2' || codec == 'j2k') {
-                j2kArrayToCanvas(arrayData, codec, canvas, container);
-            } else if (codec == 'jxr') {
-                jxrWorker.onmessage = function(event) {
-                    var jxrBmp = new Blob([new DataView(event.data.buffer)], {type: "image/bmp"});
-                    jxrBmpToCanvas(jxrBmp, canvas, container);
-                };
-                if (jxrWorker !== undefined) {
-                    jxrWorker.postMessage(xhr.response);
-                } else console.log("Cannot decode JPEG XR.");
-            } else if (codec == 'webp') {
-                webpArrayToCanvas(arrayData, canvas, container);
-            } else {
-                console.error("No support for " + url);
-                return false;
-            }
-        };
-        image.src = blobPath;
+        if (codec == 'bpg') {
+            var bpg = new BPGDecoder(canvas.getContext("2d"));
+            bpg.onload = function() {
+                canvas.width = bpg.imageData.width;
+                canvas.height = bpg.imageData.height;
+                canvas.getContext("2d").putImageData(bpg.imageData, 0, 0);
+                processCanvasSize(canvas, canvas.width, canvas.height, container);
+                window.URL.revokeObjectURL(blobPath);
+            };
+            bpg.load(blobPath);
+        } else {
+            image.onload = function() {
+                canvas.width = image.width;
+                canvas.height = image.height;
+                canvas.getContext("2d").drawImage(image, 0, 0);
+                processCanvasSize(canvas, image.width, image.height, container);
+                window.URL.revokeObjectURL(blobPath);
+            };
+            image.onerror = function() {
+                var arrayData = new Uint8Array(xhr.response);
+
+                if (codec == 'jp2' || codec == 'j2k') {
+                    j2kArrayToCanvas(arrayData, codec, canvas, container);
+                } else if (codec == 'jxr') {
+                    jxrWorker.onmessage = function(event) {
+                        var jxrBmp = new Blob([new DataView(event.data.buffer)], {type: "image/bmp"});
+                        jxrBmpToCanvas(jxrBmp, canvas, container);
+                    };
+                    if (jxrWorker !== undefined) { jxrWorker.postMessage(xhr.response); }
+                    else console.error("Cannot decode JPEG XR.");
+                } else if (codec == 'webp') {
+                    webpArrayToCanvas(arrayData, canvas, container);
+                } else { console.error("No support for " + url); }
+            };
+            image.src = blobPath;
+        }
     };
     xhr.send();
 
-    function jxrBmpToCanvas(jxrBmp, canvas, container) {
-    	var bmpUrl = window.URL.createObjectURL(jxrBmp);
-    	var img = new Image();
-        img.onload = function() {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            canvas.getContext("2d").drawImage(img, 0, 0);
-            processCanvasSize(canvas, canvas.width, canvas.height, container);
-            window.URL.revokeObjectURL(bmpUrl);
-        };
-        img.src = bmpUrl;
-    };
 	function j2kArrayToCanvas(encData, codec, canvas, container) {
 	    jp2Worker.onmessage = function(event) {
-	        var bitmap = event.data;
-	        var pixelsPerChannel = bitmap.width * bitmap.height;
+	        var bitmap = event.data.data;
 	        if (!bitmap) { return false; }
 
-	        canvas.width = bitmap.width;
-	        canvas.height = bitmap.height;
+	        canvas.width = event.data.width;
+	        canvas.height = event.data.height;
 	        var ctx = canvas.getContext("2d");
 	        var output = ctx.createImageData(canvas.width, canvas.height);
+            var outputData = output.data;
 
+            var pixelsPerChannel = canvas.width * canvas.height;
 	        var i = 0,
 	            j = 0;
-	        while (i < output.data.length && j < pixelsPerChannel) {
-	            output.data[i] = bitmap.data[j]; // R
-	            output.data[i + 1] = bitmap.data[j + pixelsPerChannel]; // G
-	            output.data[i + 2] = bitmap.data[j + (2 * pixelsPerChannel)]; // B
-	            output.data[i + 3] = 255; // A
+	        while (i < outputData.length && j < pixelsPerChannel) {
+	            outputData[i] = bitmap[j]; // R
+	            outputData[i + 1] = bitmap[j + pixelsPerChannel]; // G
+	            outputData[i + 2] = bitmap[j + (2 * pixelsPerChannel)]; // B
+	            outputData[i + 3] = 255; // A
 	            i += 4;
 	            j += 1;
 	        };
@@ -337,8 +326,20 @@ function setImage(container, name, codec, setText) {
 	            bytes: encData,
 	            extension: codec
 	        });
-	    } else console.log("Cannot decode JPEG 2000.");
+	    } else console.error("Cannot decode JPEG 2000.");
 	};
+    function jxrBmpToCanvas(jxrBmp, canvas, container) {
+        var bmpUrl = window.URL.createObjectURL(jxrBmp);
+        var img = new Image();
+        img.onload = function() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            canvas.getContext("2d").drawImage(img, 0, 0);
+            processCanvasSize(canvas, canvas.width, canvas.height, container);
+            window.URL.revokeObjectURL(bmpUrl);
+        };
+        img.src = bmpUrl;
+    };
 	function webpArrayToCanvas(encData, canvas, container) {
 	    webpWorker.onmessage = function(event) {
 	        var bitmap = event.data.bitmap;
@@ -365,17 +366,17 @@ function setImage(container, name, codec, setText) {
 	    };
 	    if (webpWorker !== undefined) {
 	        webpWorker.postMessage(encData);
-	    } else console.log("Cannot decode WebP.");
+	    } else console.error("Cannot decode WebP.");
 	}
 }
 
 function setSide(side) {
 	var isRight = (side.toLowerCase() == 'right') ? 1 : 0;
 	var whichQual = (isRight) ? rightQual : leftQual;
-    var image = getSelValue(whichSel[isRight]);
-    var name = whichSel[isRight].options[whichSel[isRight].selectedIndex].innerHTML;
+    var image = getSelValue(whichSel[isRight], 'value');
+    var pathBase = getSelValue(whichSel[isRight], 'folder');
 
-    if (name != 'Original') {
+    if (pathBase != 'Original') {
         whichQual.disabled=false;
         var quality = whichQual.options[whichQual.selectedIndex].innerHTML.toLowerCase() + '/';
     } else {
@@ -383,11 +384,11 @@ function setSide(side) {
         var quality = '';
     }
 
-    name = quality + name;
+    pathBase = quality + pathBase;
     viewOptions[1 + 2*isRight] = image;
     viewOptions[2 + 2*isRight] = getSelValue(whichQual);
 
-    setImage(whichSide[isRight], name, image,
+    setImage(whichSide[isRight], pathBase, image,
         function(kbytes) {
             whichText[isRight].innerHTML = (isRight) ? "&rarr;&nbsp;" + kbytes : kbytes + "&nbsp;&larr;";
             textHeight = (isRight) ? textHeight : whichText[isRight].offsetHeight;
@@ -397,9 +398,9 @@ function setSide(side) {
 }
 
 function setFile() {
-    urlFile = getSelValue(fileSel);
+    urlFile = getSelValue(fileSel, 'value');
 
-    /* Flag to specially process when both left & right are both new. */
+    /* Flag for special processing when both left & right are both new. */
     first = 1;
     /* Any view change will update hash. */
     viewOptions[0] = getSlugName(fileSel.options[fileSel.selectedIndex].text);
@@ -422,14 +423,14 @@ function moveSplit(event) {
     return false;
 }
 
-/* Shift key to enter 'flip view'. Repeat to flip. Any other key to return to split-view. */
+/* Shift key to enter 'flip-view'. Repeat to flip between images. Any other key to return to split-view. */
 function switchMode(event) {
     var keyCode = (event) ? event.keyCode : 0;
     if (keyCode == "16") {
         splitMode = 0;
         var currLeft = (whichSide[0].offsetWidth > 1) ? 1 : 0; // current focus
 
-        centerHead.innerHTML = getSelValue(whichSel[currLeft]) + ' '
+        centerHead.innerHTML = getSelValue(whichSel[currLeft], 'value') + ' '
                              + whichText[currLeft].innerHTML.replace(/&nbsp;/g, '').replace(/←|→/g, '');
 
         whichSide[0].style.borderRight = "none";
@@ -445,7 +446,7 @@ function switchMode(event) {
     whichText[1].style.opacity = splitMode;
 }
 
-/* Process URl hash for directly links. */
+/* Process URL hash for direct links. */
 function getWindowsOptions() {
     if (window.location.hash) {
         var hashArray = (location.hash+'&='+'&=').split('&', 5);

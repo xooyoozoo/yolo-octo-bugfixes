@@ -73,12 +73,12 @@
             <tr>
                 <td class="title" style="width:16em;padding-left:4em;text-align:right;">
                     <select id="leftSel" style="font-size: 1.1em;">
-                        <option value="bpg">BPG-x265</option>
-                        <option value="jpg" selected>Mozjpeg</option>
-                        <option value="jp2">JP2K-Kakadu</option>
-                        <option value="jxr">JPEG XR</option>
-                        <option value="webp">WebP</option>
-                        <option value="png">Original</option>
+                        <option value="bpg"  folder="BPG-x265">BPG</option>
+                        <option value="jpg"  folder="Mozjpeg" selected>JPEG</option>
+                        <option value="jp2"  folder="JP2K-Kakadu">JPEG 2000</option>
+                        <option value="jxr"  folder="JPEG XR">JPEG XR</option>
+                        <option value="webp" folder="WebP">WebP</option>
+                        <option value="png"  folder="Original">Original</option>
                     </select>
                     <select id="leftQual" style="font-size: 1.1em;">
                         <option value="l">Large</option>
@@ -92,12 +92,12 @@
                 </td>
                 <td class="title" style="width:16em;padding-right:4em;text-align:left;">
                     <select id="rightSel" style="font-size: 1.1em;">
-                        <option value="bpg" selected>BPG-x265</option>
-                        <option value="jpg">Mozjpeg</option>
-                        <option value="jp2">JP2K-Kakadu</option>
-                        <option value="jxr">JPEG XR</option>
-                        <option value="webp">WebP</option>
-                        <option value="png">Original</option>
+                        <option value="bpg"  folder="BPG-x265" selected>BPG</option>
+                        <option value="jpg"  folder="Mozjpeg">JPEG</option>
+                        <option value="jp2"  folder="JP2K-Kakadu">JPEG 2000</option>
+                        <option value="jxr"  folder="JPEG XR">JPEG XR</option>
+                        <option value="webp" folder="WebP">WebP</option>
+                        <option value="png"  folder="Original">Original</option>
                     </select>
                     <select id="rightQual" style="font-size: 1.1em;">
                         <option value="l">Large</option>
@@ -131,7 +131,7 @@
     </div>
     <div class="caption" style="border-bottom: 1px solid; font-family: 'Courier New', Courier, monospace;">
         <p>bpgenc-0.9.1 -m 8, with x265-1.4+189 --aq-mode 1 --deblock -1:-1 --crf $Q</p>
-        <p>mozjpeg-3.0 -dc-scan-opt 2 -quality $Q</p>
+        <p>cjpeg-mozilla-3.0 -dc-scan-opt 2 -quality $Q</p>
         <p>kdu_compress-7.4 -no_info -full -precise -slope $Q</p>
         <p>jxrencapp-1.1+ccf11047dbec -q $Q</p>
         <p>cwebp-0.4.2 -m 6 -pass 10 -size $Q</p>

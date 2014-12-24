@@ -1,21 +1,7 @@
-importScripts('jxrDecLib.min.js');
+importScripts('jxrdeclib.js');
 
 var JxrLib;
 (function(JxrLib) {
-/*
-    function readBlob(blob) {
-        return new Promise(function(resolve, reject) {
-            var reader = new FileReader();
-            reader.onload = function() {
-                return resolve(reader.result);
-            };
-            reader.onerror = function(err) {
-                return reject(new Error(err.message));
-            };
-            reader.readAsArrayBuffer(blob);
-        });
-    }
-*/
     function decode(input, options) {
         var sequence;
         if (input instanceof ArrayBuffer)
@@ -45,27 +31,6 @@ var JxrLib;
         });
     }
     JxrLib.decode = decode;
-/*
-    function decodeAsBlob(input, options) {
-        return decode(input, options).then(function(uint8array) {
-            return new Blob([new DataView(uint8array.buffer)], {
-                type: "image/bmp"
-            });
-        });
-    }
-    JxrLib.decodeAsBlob = decodeAsBlob;
-
-    function decodeAsElement(input, options) {
-        return decodeAsBlob(input, options).then(function(blob) {
-            var image = new Image();
-            image.src = URL.createObjectURL(blob, {
-                oneTimeOnly: true
-            });
-            return image;
-        });
-    }
-    JxrLib.decodeAsElement = decodeAsElement;
-*/
 })(JxrLib || (JxrLib = {}));
 var EmscriptenUtility;
 (function(EmscriptenUtility) {
