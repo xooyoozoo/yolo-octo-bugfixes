@@ -84,6 +84,7 @@ var textHeight = whichText[0].offsetHeight;
 var first = 1;
 var splitMode = 1;
 
+/* file|codec|qual > setSide > setImage > processCanvasSize > setSize > setSplit */
 fileSel.onchange = function() {
     scaleSel.options[2].selected = true;
     setFile();
@@ -113,6 +114,7 @@ function getSelValue(el) {
     return el.options[el.selectedIndex].getAttribute("value");
 }
 
+/* Get web-friendly string */
 function getSlugName(str) {
     str = str.replace(/^\s+|\s+$/g, ''); // trim
     str = str.toLowerCase();
@@ -131,6 +133,7 @@ function getSlugName(str) {
     return str;
 }
 
+/* Create new worker if needed. Terminate worker if unneeded. */
 function checkWorkers(selIdx) {
     var curSel = getSelValue(whichSel[selIdx]);
     var img = { l: getSelValue(whichSel[0]),
@@ -154,6 +157,7 @@ function checkWorkers(selIdx) {
     }
 }
 
+/* Uses Lanczos2 for rescaling. In-browser too blurry. Lanczos3 too slow. */
 function processCanvasSize(inCanvas, width, height, el) {
     var scale = getSelValue(scaleSel);
     if ( scale == 1 ) {
@@ -395,7 +399,9 @@ function setSide(side) {
 function setFile() {
     urlFile = getSelValue(fileSel);
 
+    /* Flag to specially process when both left & right are both new. */
     first = 1;
+    /* Any view change will update hash. */
     viewOptions[0] = getSlugName(fileSel.options[fileSel.selectedIndex].text);
 
     setSide('right');
@@ -416,6 +422,7 @@ function moveSplit(event) {
     return false;
 }
 
+/* Shift key to enter 'flip view'. Repeat to flip. Any other key to return to split-view. */
 function switchMode(event) {
     var keyCode = (event) ? event.keyCode : 0;
     if (keyCode == "16") {
@@ -438,6 +445,7 @@ function switchMode(event) {
     whichText[1].style.opacity = splitMode;
 }
 
+/* Process URl hash for directly links. */
 function getWindowsOptions() {
     if (window.location.hash) {
         var hashArray = (location.hash+'&='+'&=').split('&', 5);
