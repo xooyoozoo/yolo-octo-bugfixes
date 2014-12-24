@@ -1,4 +1,4 @@
-(function() {
+(function() {   /* alphabetize, randomize */
     var file = document.getElementById('fileSel');
     var fileTexts = new Array();
     var selCandidates = new Array()
@@ -21,8 +21,9 @@
     }
     file.multiple = false;
     selCandidates[Math.floor(Math.random() * selCandidates.length)].selected = true;
-})(); // alphabetize, randomize
+})();
 
+/* Checks for native image decoders */
 var jp2Worker;
 var jp2Decoder = 0;
 (function() {
@@ -51,6 +52,7 @@ var webpDecoder = 0;
     };
     webp.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
 })();
+/* End checks */
 
 var fileSel = getElId('fileSel');
 var scaleSel = getElId('scaling');
@@ -84,12 +86,24 @@ var textHeight = whichText[0].offsetHeight;
 var first = 1;
 var splitMode = 1;
 
-/* file|codec|qual > setSide > setImage > processCanvasSize > setSize > setSplit */
+/* */
+var canvases = {
+    left: createCanvas(800, 800),
+    right: createCanvas(800, 800)
+}
+function createCanvas(width, height) {
+    var c = document.createElement("canvas");
+    c.width = width;
+    c.height = height;
+    return c;
+}
+
+/* file|codec|qual > setSide > setImage > setSize > setSplit */
 fileSel.onchange = function() {
     scaleSel.options[2].selected = true;
     setFile();
 };
-scaleSel.onchange = setFile;
+scaleSel.onchange = processCanvasScale;
 whichSel[0].onchange = function() {
     checkWorkers(0);
     setSide('left');
@@ -158,23 +172,40 @@ function checkWorkers(selIdx) {
 }
 
 /* Uses Lanczos2 for rescaling. In-browser too blurry. Lanczos3 too slow. */
-function processCanvasSize(inCanvas, width, height, el) {
-    var scale = getSelValue(scaleSel, 'value');
-    if ( scale == 1 ) {
-        return setSize(inCanvas.toDataURL(), width, height, el); // no resize needed
+function processCanvasScale() {
+    // No support for directly going to a rescale
+    if (first) {
+        setFile();
+        scaleSel.options[2].selected = true;
+        return;
     }
 
-    var outCanvas = document.createElement("canvas");
-    outCanvas.width = Math.round(width*scale);
-    outCanvas.height = Math.round(height*scale);
+    var newR = scaleCanvas(canvases.right);
+    var newL = scaleCanvas(canvases.left);
 
-    window.pica.WW = false;
-    window.pica.resizeCanvas(inCanvas, outCanvas,
-        { quality: 2, alpha: false, unsharpAmount: 0, unsharpThreshold: 0, transferable: false },
-        function (err) { return; }
-    )
+    setSize(newR.toDataURL(), newR.width, newR.height, whichSide[1]);
+    setSize(newL.toDataURL(), newL.width, newL.height, whichSide[0]);
 
-    setSize(outCanvas.toDataURL(), outCanvas.width, outCanvas.height, el);
+    function scaleCanvas(inCanvas) {
+        var width, height, scale;
+        width = inCanvas.width;
+        height = inCanvas.height;
+        scale = getSelValue(scaleSel, 'value');
+        if ( scale == 1 ) {
+            return inCanvas;
+        }
+
+        var outCanvas = document.createElement("canvas");
+        outCanvas.width = Math.round(width*scale);
+        outCanvas.height = Math.round(height*scale);
+
+        window.pica.WW = false;
+        window.pica.resizeCanvas(inCanvas, outCanvas,
+            { quality: 2, alpha: false, unsharpAmount: 0, unsharpThreshold: 0, transferable: false },
+            function (err) { ; }
+        )
+        return outCanvas;
+    }
 }
 
 function setSize(src, width, height, el) {
@@ -232,7 +263,9 @@ function setSplit() {
     }
 }
 
-function setImage(container, pathBase, codec, setText) {
+function setImage(side, pathBase, codec, setText) {
+    var canvas = (side == 'left') ? canvases.left : canvases.right;
+    var container = (side == 'left') ? whichSide[0] : whichSide [1];
     if ( container == whichSide[0] || first ) {
         container.style.backgroundColor = "#c6c6c6";
         container.style.backgroundImage = "";
@@ -246,15 +279,14 @@ function setImage(container, pathBase, codec, setText) {
     xhr.responseType = "arraybuffer";
 
     xhr.onload = function() {
-        var kbytes = (xhr.response.byteLength / 1024).toFixed(1) + " KB";
-        setText(kbytes);
+        setText( (xhr.response.byteLength/1024).toFixed(1) + " KB" );
 
         var blob = new Blob([xhr.response], {
             type: "image/" + codec
         });
         var blobPath = window.URL.createObjectURL(blob);
 
-        var canvas = document.createElement("canvas");
+        canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
         var image = new Image();
 
         if (codec == 'bpg') {
@@ -263,7 +295,7 @@ function setImage(container, pathBase, codec, setText) {
                 canvas.width = bpg.imageData.width;
                 canvas.height = bpg.imageData.height;
                 canvas.getContext("2d").putImageData(bpg.imageData, 0, 0);
-                processCanvasSize(canvas, canvas.width, canvas.height, container);
+                setSize(canvas.toDataURL(), canvas.width, canvas.height, container);
                 window.URL.revokeObjectURL(blobPath);
             };
             bpg.load(blobPath);
@@ -272,7 +304,8 @@ function setImage(container, pathBase, codec, setText) {
                 canvas.width = image.width;
                 canvas.height = image.height;
                 canvas.getContext("2d").drawImage(image, 0, 0);
-                processCanvasSize(canvas, image.width, image.height, container);
+                setSize(canvas.toDataURL(), canvas.width, canvas.height, container);
+
                 window.URL.revokeObjectURL(blobPath);
             };
             image.onerror = function() {
@@ -319,7 +352,7 @@ function setImage(container, pathBase, codec, setText) {
 	            j += 1;
 	        };
 	        ctx.putImageData(output, 0, 0);
-	        processCanvasSize(canvas, canvas.width, canvas.height, container);
+	        setSize(canvas.toDataURL(), canvas.width, canvas.height, container);
 	    };
 	    if (jp2Worker !== undefined) {
 	        jp2Worker.postMessage({
@@ -335,7 +368,7 @@ function setImage(container, pathBase, codec, setText) {
             canvas.width = img.width;
             canvas.height = img.height;
             canvas.getContext("2d").drawImage(img, 0, 0);
-            processCanvasSize(canvas, canvas.width, canvas.height, container);
+            setSize(canvas.toDataURL(), canvas.width, canvas.height, container);
             window.URL.revokeObjectURL(bmpUrl);
         };
         img.src = bmpUrl;
@@ -362,7 +395,7 @@ function setImage(container, pathBase, codec, setText) {
 	            };
 	        };
 	        ctx.putImageData(output, 0, 0);
-	        processCanvasSize(canvas, canvas.width, canvas.height, container);
+	        setSize(canvas.toDataURL(), canvas.width, canvas.height, container);
 	    };
 	    if (webpWorker !== undefined) {
 	        webpWorker.postMessage(encData);
@@ -386,9 +419,9 @@ function setSide(side) {
 
     pathBase = quality + pathBase;
     viewOptions[1 + 2*isRight] = image;
-    viewOptions[2 + 2*isRight] = getSelValue(whichQual);
+    viewOptions[2 + 2*isRight] = getSelValue(whichQual, 'value');
 
-    setImage(whichSide[isRight], pathBase, image,
+    setImage(side.toLowerCase(), pathBase, image,
         function(kbytes) {
             whichText[isRight].innerHTML = (isRight) ? "&rarr;&nbsp;" + kbytes : kbytes + "&nbsp;&larr;";
             textHeight = (isRight) ? textHeight : whichText[isRight].offsetHeight;
