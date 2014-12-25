@@ -34,13 +34,7 @@ var scaleSel = getElId('scaling');
 var whichSel = [getElId('leftSel'), getElId('rightSel')];
 var whichSide = [getElId('leftContainer'), getElId('rightContainer')];
 
-var viewOptions = [
-    '', /* file */
-    '', /* left-image */
-    '', /* left-quality */
-    '', /* right-image */
-    ''  /* right-quality */
-];
+var viewOptions = {file:'', scale:'', left:'', leftQ: '', right:'', rightQ:''};
 
 var offset = {
     width: whichSide[1].getBoundingClientRect().width,
@@ -61,7 +55,6 @@ var textHeight = whichText[0].offsetHeight;
 var first = 1;
 var splitMode = 1;
 
-/* */
 var canvases = {
     left: createCanvas(800, 800),
     right: createCanvas(800, 800)
@@ -81,12 +74,13 @@ function checkDecSupport(flag, decodedWidth, encodedUrl) {
 	img.src = encodedUrl;
 }
 
-/* file|codec|qual > setSide > setImage > setSize > setSplit */
+/* file|scale|codec|qual > setSide > setImage > processCanvasScale > setSize > setSplit */
 fileSel.onchange = function() {
     scaleSel.options[2].selected = true;
     setFile();
 };
 scaleSel.onchange = processCanvasScale;
+
 whichSel[0].onchange = function() {
     checkWorkers(0);
     setSide('left');
@@ -164,16 +158,18 @@ function processCanvasScale(canvas, container) {
     }
 
     function scaleCanvas(inCanvas, el) {
-        var width, height, scale;
-        width = inCanvas.width;
-        height = inCanvas.height;
-        scale = getSelValue(scaleSel, 'value');
-
+        var scale = getSelValue(scaleSel, 'value');
         if ( scale == 1 ) {
+            viewOptions.scale = '';
             return setSize(inCanvas, el);
         }
 
-        var outCanvas = document.createElement("canvas");
+        var width, height, outCanvas;
+        viewOptions.scale = '*' + getSelValue(scaleSel, 'ratio');
+        width = inCanvas.width;
+        height = inCanvas.height;
+
+        outCanvas = document.createElement("canvas");
         outCanvas.width = Math.round(width*scale);
         outCanvas.height = Math.round(height*scale);
 
@@ -213,6 +209,9 @@ function setSize(inCanvas, el) {
     }
     switchMode();
     setSplit();
+    window.location.hash = (viewOptions.file).concat(viewOptions.scale,
+                                              '&',viewOptions.left,'=',viewOptions.leftQ,
+                                              '&',viewOptions.right,'=',viewOptions.rightQ);
 }
 
 function setSplit() {
@@ -400,26 +399,23 @@ function setSide(side) {
     }
 
     pathBase = quality + pathBase;
-    viewOptions[1 + 2*isRight] = image;
-    viewOptions[2 + 2*isRight] = getSelValue(whichQual, 'value');
+    viewOptions[side.toLowerCase()] = image;
+    viewOptions[side.toLowerCase() + 'Q'] = getSelValue(whichQual, 'value');
 
     setImage(side.toLowerCase(), pathBase, image,
         function(kbytes) {
             whichText[isRight].innerHTML = (isRight) ? "&rarr;&nbsp;" + kbytes : kbytes + "&nbsp;&larr;";
             textHeight = (isRight) ? textHeight : whichText[isRight].offsetHeight;
         });
-    window.location.hash = viewOptions[0].concat('&',viewOptions[1],'=',viewOptions[2],
-                                                 '&',viewOptions[3],'=',viewOptions[4]);
 }
 
 function setFile() {
-	console.log('Native image decoders: ', nativeDec);
     urlFile = getSelValue(fileSel, 'value');
 
     /* Flag for special processing when both left & right are both new. */
     first = 1;
     /* Any view change will update hash. */
-    viewOptions[0] = getSlugName(fileSel.options[fileSel.selectedIndex].text);
+    viewOptions.file = getSlugName(fileSel.options[fileSel.selectedIndex].text);
 
     setSide('right');
     setSide('left');
@@ -444,15 +440,17 @@ function switchMode(event) {
     var keyCode = (event) ? event.keyCode : 0;
     if (keyCode == "16") {
         splitMode = 0;
-        var currLeft = (whichSide[0].offsetWidth > 1) ? 1 : 0; // current focus
+        var currLeft = (whichSide[0].style.opacity > 0) ? 1 : 0; // current focus
 
         centerHead.innerHTML = getSelValue(whichSel[currLeft], 'value') + ' '
                              + whichText[currLeft].innerHTML.replace(/&nbsp;/g, '').replace(/←|→/g, '');
 
         whichSide[0].style.borderRight = "none";
-        whichSide[0].style.width = (offset.width * (1-currLeft) * 0.99999) + "px";
+        whichSide[0].style.opacity = 1 - currLeft;
+        whichSide[0].style.width = (offset.width - 1) + "px";
     } else if (!splitMode) {
         whichSide[0].style.borderRight = "1px dotted white";
+        whichSide[0].style.opacity = 1;
         whichSide[0].style.width = split.x + "px";
         centerHead.innerHTML = "--- vs ---";
         splitMode = 1;
@@ -465,14 +463,22 @@ function switchMode(event) {
 /* Process URL hash for direct links. */
 function getWindowsOptions() {
     if (window.location.hash) {
-        var hashArray = (location.hash+'&='+'&=').split('&', 5);
-        var leftOpts = hashArray[1].split('=', 2);
-        var rightOpts = hashArray[2].split('=', 2);
-        var imageSet = fileSel.options;
-        for (var opt, j = 0; opt = imageSet[j]; j++) {
-            if (getSlugName(opt.text) == hashArray[0].substring(1)) {
+        var hashArray, imgOpts, name, scale, leftOpts, rightOpts;
+        hashArray = (location.hash+'&='+'&=').split('&', 5);
+
+        imgOpts = hashArray[0].split('*', 2);
+        leftOpts = hashArray[1].split('=', 2);
+        rightOpts = hashArray[2].split('=', 2);
+
+        for (var opt, j = 0; opt = fileSel.options[j]; j++) {
+            if (getSlugName(opt.text) == imgOpts[0].substring(1)) {
                 fileSel.selectedIndex = j;
-                var s, q;
+                var z, s, q;
+
+                if (imgOpts[1]) {
+                    var z = document.querySelector('#scaling [ratio="' + imgOpts[1] + '"]');
+                    if (z) {z.selected = true};
+                }
                 if (leftOpts) {
                     s = document.querySelector('#leftSel [value="' + leftOpts[0] + '"]');
                     if (s) {s.selected = true};
