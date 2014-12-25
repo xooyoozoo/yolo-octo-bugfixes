@@ -155,38 +155,34 @@ function checkWorkers(selIdx) {
 /* Uses Lanczos2 for rescaling. In-browser too blurry. Lanczos3 too slow. */
 function processCanvasScale(canvas, container) {
     if (container) {
-    	// Process only one side
-    	setSize(scaleCanvas(canvas), container);
+        // Process only one side
+        scaleCanvas(canvas, container);
     } else {
-    	// Process both side at once
-	    var newR = scaleCanvas(canvases.right);
-	    var newL = scaleCanvas(canvases.left);
-
-	    setSize(newR, whichSide[1]);
-	    setSize(newL, whichSide[0]);
+        // Process both sides at once
+        scaleCanvas(canvases.right, whichSide[1]);
+        scaleCanvas(canvases.left, whichSide[0]);
     }
 
-    function scaleCanvas(inCanvas) {
+    function scaleCanvas(inCanvas, el) {
         var width, height, scale;
         width = inCanvas.width;
         height = inCanvas.height;
         scale = getSelValue(scaleSel, 'value');
 
         if ( scale == 1 ) {
-            return inCanvas;
+            return setSize(inCanvas, el);
         }
 
         var outCanvas = document.createElement("canvas");
         outCanvas.width = Math.round(width*scale);
         outCanvas.height = Math.round(height*scale);
 
-        window.pica.WW = false;
+        window.pica.WW = true;
         window.pica.resizeCanvas(inCanvas, outCanvas,
             { quality: 2, alpha: false, unsharpAmount: 0,
-            	unsharpThreshold: 0, transferable: false },
-            function (err) { ; }
+              unsharpThreshold: 0, transferable: true },
+            function() { setSize(outCanvas, el); }
         )
-        return outCanvas;
     }
 }
 
