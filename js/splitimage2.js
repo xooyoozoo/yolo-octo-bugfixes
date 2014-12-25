@@ -23,36 +23,11 @@
     selCandidates[Math.floor(Math.random() * selCandidates.length)].selected = true;
 })();
 
-/* Checks for native image decoders */
-var jp2Worker;
-var jp2Decoder = 0;
-(function() {
-    var jp2 = new Image();
-    jp2.onload = jp2.onerror = function() {
-        if (jp2.width && jp2.width !== 0) { jp2Decoder = 1; }
-    };
-    jp2.src = 'data:image/jp2;base64,AAAADGpQICANCocKAAAAFGZ0eXBqcDIgAAAAAGpwMiAAAAAtanAyaAAAABZpaGRyAAAABAAAAAQAAw8HAAAAAAAPY29scgEAAAAAABAAAABpanAyY/9P/1EALwAAAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAEAAAAAAAAAAAAAw8BAQ8BAQ8BAf9SAAwAAAABAQAEBAAB/1wABECA/5AACgAAAAAAGAAB/5PP/BAQFABcr4CA/9k=';
-})();
-
-var jxrWorker;
-var jxrDecoder = 0;
-(function() {
-    var jxr = new Image();
-    jxr.onload = function() { jxrDecoder = 1 };
-    jxr.onerror = function() { jxrDecoder = 0 };
-    jxr.src = 'data:image/vnd.ms-photo;base64,SUm8AQgAAAAJAAG8AQAQAAAAegAAAAK8BAABAAAAAAAAAAS8BAABAAAAAAAAAIC8BAABAAAAAgAAAIG8BAABAAAAAwAAAIK8CwABAAAAAADAQoO8CwABAAAAAADAQsC8BAABAAAAigAAAMG8BAABAAAADgEAAAAAAAAkw91vA07+S7GFPXd2jckMV01QSE9UTwARRMBxAAEAAmAAoAAKAACgAAAAAQAAAAkAPv8ABEKAAAEAAAEByQ1Yf8AAAAEC+CFiBD4ggohx4eEAEYaNG1TNAiQC9xR+0RLkCyGAAABAMAALCApgSCe/8AAAAAAAAAAAAQMjN6DL0wTgiCRowm+GEBEEfCCSwwmmGEqhBEogj4QTUjCSQgl5wQ2CPqCiemEkSMJ8QQQUOaQT+kAJnaCiemEkSMJ8QVBRPTCSJGE+IIIKHNIJ/SAEzoQUOaQT+kAJnaCVUgksQgjTF0EqpBJYhBGmLoJVSCSyQRpy6CVUgksiCNMTsKHMwn9QhM7wocmE/pBCZ3hQ5MJ/SCEzvChyYT+oQmdA';
-})();
-
-var webpWorker;
-var webpDecoder = 0;
-(function() {
-    var webp = new Image();
-    webp.onload = webp.onerror = function() {
-        if (webp.height == 2) { webpDecoder = 1; }
-    };
-    webp.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
-})();
-/* End checks */
+var workers = {bpg: undefined, jp2: undefined, jxr: undefined, webp: undefined};
+var nativeDec = {bpg: false, jp2: false, jxr: false, webp: false};
+checkDecSupport('jp2', 4, 'data:image/jp2;base64,AAAADGpQICANCocKAAAAFGZ0eXBqcDIgAAAAAGpwMiAAAAAtanAyaAAAABZpaGRyAAAABAAAAAQAAw8HAAAAAAAPY29scgEAAAAAABAAAABpanAyY/9P/1EALwAAAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAEAAAAAAAAAAAAAw8BAQ8BAQ8BAf9SAAwAAAABAQAEBAAB/1wABECA/5AACgAAAAAAGAAB/5PP/BAQFABcr4CA/9k=');
+checkDecSupport('jxr', 1, 'data:image/vnd.ms-photo;base64,SUm8AQgAAAAFAAG8AQAQAAAASgAAAIC8BAABAAAAAQAAAIG8BAABAAAAAQAAAMC8BAABAAAAWgAAAMG8BAABAAAAHwAAAAAAAAAkw91vA07+S7GFPXd2jckNV01QSE9UTwAZAYBxAAAAABP/gAAEb/8AAQAAAQAAAA==');
+checkDecSupport('webp', 2, 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA');
 
 var fileSel = getElId('fileSel');
 var scaleSel = getElId('scaling');
@@ -96,6 +71,14 @@ function createCanvas(width, height) {
     c.width = width;
     c.height = height;
     return c;
+}
+
+function checkDecSupport(flag, decodedWidth, encodedUrl) {
+	var img = new Image();
+	img.onload = img.onerror = function() {
+		if (img.width && img.width === decodedWidth) { nativeDec[flag] = true; };
+	}
+	img.src = encodedUrl;
 }
 
 /* file|codec|qual > setSide > setImage > setSize > setSplit */
@@ -158,39 +141,37 @@ function checkWorkers(selIdx) {
     processWorker('webp');
 
     function processWorker(codec) {
-        eval("var worker = " + codec +"Worker");
-        eval("var canDecode = " + codec + "Decoder");
-
         if (img.l != codec && img.r != codec) {
-            if (worker !== undefined) {
-                eval(codec +"Worker.terminate()");
-                eval(codec +"Worker = undefined");            }
-        } else if (canDecode==0 && curSel==codec && worker===undefined) {
-            eval(codec + "Worker = new Worker('js/"+ codec +"Worker.js')");
+            if (workers[codec] !== undefined) {
+                workers[codec].terminate();
+                workers[codec] = undefined;
+            }
+        } else if (!nativeDec[codec] && curSel==codec && workers[codec]===undefined) {
+            workers[codec] = new Worker('js/' + codec + 'Worker.js');
         }
     }
 }
 
 /* Uses Lanczos2 for rescaling. In-browser too blurry. Lanczos3 too slow. */
-function processCanvasScale() {
-    // No support for directly going to a rescale
-    if (first) {
-        setFile();
-        scaleSel.options[2].selected = true;
-        return;
+function processCanvasScale(canvas, container) {
+    if (container) {
+    	// Process only one side
+    	setSize(scaleCanvas(canvas), container);
+    } else {
+    	// Process both side at once
+	    var newR = scaleCanvas(canvases.right);
+	    var newL = scaleCanvas(canvases.left);
+
+	    setSize(newR, whichSide[1]);
+	    setSize(newL, whichSide[0]);
     }
-
-    var newR = scaleCanvas(canvases.right);
-    var newL = scaleCanvas(canvases.left);
-
-    setSize(newR.toDataURL(), newR.width, newR.height, whichSide[1]);
-    setSize(newL.toDataURL(), newL.width, newL.height, whichSide[0]);
 
     function scaleCanvas(inCanvas) {
         var width, height, scale;
         width = inCanvas.width;
         height = inCanvas.height;
         scale = getSelValue(scaleSel, 'value');
+
         if ( scale == 1 ) {
             return inCanvas;
         }
@@ -201,14 +182,19 @@ function processCanvasScale() {
 
         window.pica.WW = false;
         window.pica.resizeCanvas(inCanvas, outCanvas,
-            { quality: 2, alpha: false, unsharpAmount: 0, unsharpThreshold: 0, transferable: false },
+            { quality: 2, alpha: false, unsharpAmount: 0,
+            	unsharpThreshold: 0, transferable: false },
             function (err) { ; }
         )
         return outCanvas;
     }
 }
 
-function setSize(src, width, height, el) {
+function setSize(inCanvas, el) {
+	var src, width, height;
+	src = inCanvas.toDataURL();
+	width = inCanvas.width;
+	height = inCanvas.height;
     if (first) {
         whichSide[0].style.height = height + "px";
         whichSide[1].style.height = height + "px";
@@ -281,8 +267,9 @@ function setImage(side, pathBase, codec, setText) {
     xhr.onload = function() {
         setText( (xhr.response.byteLength/1024).toFixed(1) + " KB" );
 
+        var mimeCodec = (codec=='jxr') ? 'vnd.ms-photo' : codec;
         var blob = new Blob([xhr.response], {
-            type: "image/" + codec
+            type: "image/" + mimeCodec
         });
         var blobPath = window.URL.createObjectURL(blob);
 
@@ -295,7 +282,7 @@ function setImage(side, pathBase, codec, setText) {
                 canvas.width = bpg.imageData.width;
                 canvas.height = bpg.imageData.height;
                 canvas.getContext("2d").putImageData(bpg.imageData, 0, 0);
-                setSize(canvas.toDataURL(), canvas.width, canvas.height, container);
+                processCanvasScale(canvas, container);
                 window.URL.revokeObjectURL(blobPath);
             };
             bpg.load(blobPath);
@@ -304,8 +291,7 @@ function setImage(side, pathBase, codec, setText) {
                 canvas.width = image.width;
                 canvas.height = image.height;
                 canvas.getContext("2d").drawImage(image, 0, 0);
-                setSize(canvas.toDataURL(), canvas.width, canvas.height, container);
-
+                processCanvasScale(canvas, container);
                 window.URL.revokeObjectURL(blobPath);
             };
             image.onerror = function() {
@@ -314,11 +300,11 @@ function setImage(side, pathBase, codec, setText) {
                 if (codec == 'jp2' || codec == 'j2k') {
                     j2kArrayToCanvas(arrayData, codec, canvas, container);
                 } else if (codec == 'jxr') {
-                    jxrWorker.onmessage = function(event) {
+                    workers.jxr.onmessage = function(event) {
                         var jxrBmp = new Blob([new DataView(event.data.buffer)], {type: "image/bmp"});
                         jxrBmpToCanvas(jxrBmp, canvas, container);
                     };
-                    if (jxrWorker !== undefined) { jxrWorker.postMessage(xhr.response); }
+                    if (workers.jxr !== undefined) { workers.jxr.postMessage(xhr.response); }
                     else console.error("Cannot decode JPEG XR.");
                 } else if (codec == 'webp') {
                     webpArrayToCanvas(arrayData, canvas, container);
@@ -330,7 +316,7 @@ function setImage(side, pathBase, codec, setText) {
     xhr.send();
 
 	function j2kArrayToCanvas(encData, codec, canvas, container) {
-	    jp2Worker.onmessage = function(event) {
+	    workers.jp2.onmessage = function(event) {
 	        var bitmap = event.data.data;
 	        if (!bitmap) { return false; }
 
@@ -352,10 +338,10 @@ function setImage(side, pathBase, codec, setText) {
 	            j += 1;
 	        };
 	        ctx.putImageData(output, 0, 0);
-	        setSize(canvas.toDataURL(), canvas.width, canvas.height, container);
+	        processCanvasScale(canvas, container);
 	    };
-	    if (jp2Worker !== undefined) {
-	        jp2Worker.postMessage({
+	    if (workers.jp2 !== undefined) {
+	        workers.jp2.postMessage({
 	            bytes: encData,
 	            extension: codec
 	        });
@@ -368,13 +354,13 @@ function setImage(side, pathBase, codec, setText) {
             canvas.width = img.width;
             canvas.height = img.height;
             canvas.getContext("2d").drawImage(img, 0, 0);
-            setSize(canvas.toDataURL(), canvas.width, canvas.height, container);
+            processCanvasScale(canvas, container);
             window.URL.revokeObjectURL(bmpUrl);
         };
         img.src = bmpUrl;
     };
 	function webpArrayToCanvas(encData, canvas, container) {
-	    webpWorker.onmessage = function(event) {
+	    workers.webp.onmessage = function(event) {
 	        var bitmap = event.data.bitmap;
 	        var biWidth = event.data.width;
 	        var biHeight = event.data.height;
@@ -395,10 +381,10 @@ function setImage(side, pathBase, codec, setText) {
 	            };
 	        };
 	        ctx.putImageData(output, 0, 0);
-	        setSize(canvas.toDataURL(), canvas.width, canvas.height, container);
+	        processCanvasScale(canvas, container);
 	    };
-	    if (webpWorker !== undefined) {
-	        webpWorker.postMessage(encData);
+	    if (workers.webp !== undefined) {
+	        workers.webp.postMessage(encData);
 	    } else console.error("Cannot decode WebP.");
 	}
 }
@@ -431,6 +417,7 @@ function setSide(side) {
 }
 
 function setFile() {
+	console.log('Native image decoders: ', nativeDec);
     urlFile = getSelValue(fileSel, 'value');
 
     /* Flag for special processing when both left & right are both new. */

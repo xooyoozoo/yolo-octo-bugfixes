@@ -1,37 +1,33 @@
 importScripts('jxrdeclib.js');
 
-var JxrLib;
-(function(JxrLib) {
-    function decode(input, options) {
-        var sequence;
-        if (input instanceof ArrayBuffer)
-            sequence = Promise.resolve(input);
-        else if (input instanceof Blob)
-            sequence = readBlob(input);
-        return sequence.then(function(buffer) {
-            FS.writeFile("input.jxr", new Uint8Array(buffer), {
-                encoding: "binary"
-            });
-            return EmscriptenUtility.FileSystem.synchronize(true);
-        }).then(function() {
-            var arguments = EmscriptenUtility.allocateStringArray(["./this.program", "-v", "-i", "input.jxr", "-o", "output.bmp"]);
-            var resultCode = Module.ccall("mainFn", "number", ["number", "number"], [arguments.content.length, arguments.pointer]);
-
-            if (resultCode !== 0)
-                throw new Error("Decoding failed: error code " + resultCode);
-            EmscriptenUtility.deleteStringArray(arguments);
-            FS.unlink("input.jxr");
-            return EmscriptenUtility.FileSystem.synchronize(false);
-        }).then(function() {
-            var result = FS.readFile("output.bmp", {
-                encoding: "binary"
-            });
-            FS.unlink("output.bmp");
-            return result;
+function jxrDecode(input, options) {
+    var sequence;
+    if (input instanceof ArrayBuffer)
+        sequence = Promise.resolve(input);
+    else if (input instanceof Blob)
+        sequence = readBlob(input);
+    return sequence.then(function(buffer) {
+        FS.writeFile("input.jxr", new Uint8Array(buffer), {
+            encoding: "binary"
         });
-    }
-    JxrLib.decode = decode;
-})(JxrLib || (JxrLib = {}));
+        return EmscriptenUtility.FileSystem.synchronize(true);
+    }).then(function() {
+        var arguments = EmscriptenUtility.allocateStringArray(["./this.program", "-v", "-i", "input.jxr", "-o", "output.bmp"]);
+        var resultCode = Module.ccall("mainFn", "number", ["number", "number"], [arguments.content.length, arguments.pointer]);
+
+        if (resultCode !== 0)
+            throw new Error("Decoding failed: error code " + resultCode);
+        EmscriptenUtility.deleteStringArray(arguments);
+        FS.unlink("input.jxr");
+        return EmscriptenUtility.FileSystem.synchronize(false);
+    }).then(function() {
+        var result = FS.readFile("output.bmp", {
+            encoding: "binary"
+        });
+        FS.unlink("output.bmp");
+        return result;
+    });
+}
 var EmscriptenUtility;
 (function(EmscriptenUtility) {
     function allocateString(input) {
@@ -96,5 +92,5 @@ var EmscriptenUtility;
 self.onmessage = function(event) {
     var jxr = event.data;
 
-    JxrLib.decode(jxr).then(function(arr) { self.postMessage(arr, [arr.buffer]); });
+    jxrDecode(jxr).then(function(arr) { self.postMessage(arr, [arr.buffer]); });
 }
