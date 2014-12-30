@@ -118,7 +118,7 @@
             </tr>
             <tr>
                 <td class="title" colspan="3" style="width: 20%; text-align: center; padding-bottom: 1.25em;">
-                    <select id="scaling" style="width:5em ;font-size: 1em;text-align:center;">
+                    <select id="scaleSel" style="width:5em ;font-size: 1em;text-align:center;">
                         <option ratio="1:3" value="0.5773502692">1/3</option>
                         <option ratio="1:2" value="0.7071067812">1/2</option>
                         <option ratio="1:1" value="1" selected>---</option>
@@ -129,14 +129,14 @@
             </tr>
         </table>
     </div>
-    <div class="caption" style="border-bottom: 1px solid; font-family: 'Courier New', Courier, monospace;">
+    <div id="descCli" class="caption" style="border-bottom: 1px solid; font-family: 'Courier New', Courier, monospace;">
         <p>bpgenc-0.9.1 -m 8, with x265-1.4+189 --aq-mode 1 --deblock -1:-1 --crf $Q</p>
         <p>cjpeg-mozilla-3.0 -dc-scan-opt 2 -quality $Q</p>
         <p>kdu_compress-7.4 -no_info -full -precise -slope $Q</p>
         <p>jxrencapp-1.1+ccf11047dbec -q $Q</p>
         <p>cwebp-0.4.2 -m 6 -pass 10 -size $Q</p>
     </div>
-    <div class="caption">
+    <div id="descEnc" class="caption">
         <p>Medium images were first encoded with bpgenc at 19 CRF filesizes.
             <br>Medium is 60% of Large. Small is 60% of Medium. Tiny is 60% of Small. Everything else was matched to +/- 5% filesize.</p>
         <p>BPG, <a href="https://github.com/kripken/j2k.js">JPEG 2000</a>, <a href="https://github.com/saschanaz/jxrlib.js">JPEG XR</a>, and <a href="http://webpjs.appspot.com">WebP</a> decoded in javascript when needed. Rescaling is through Lanczos2.</p>
