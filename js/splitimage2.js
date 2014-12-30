@@ -430,7 +430,6 @@ function setSide(side) {
     var image = getSelValue(select[side], 'value');
     var pathBase = getSelValue(select[side], 'folder');
 
-    console.log(urlFolder);
     if (pathBase != 'Original' && urlFolder != 'psycomp/') {
         whichQual.disabled=false;
         var quality = whichQual.options[whichQual.selectedIndex].innerHTML.toLowerCase() + '/';
@@ -440,7 +439,6 @@ function setSide(side) {
     }
 
     pathBase = quality + pathBase;
-    console.log(pathBase);
     viewOptions[side] = image;
     viewOptions[side + 'Q'] = getSelValue(whichQual, 'value');
 
@@ -535,7 +533,6 @@ function getWindowsOptions() {
         }
 
         ampArr = (hashArr.pop()+'&='+'&=').split('&', 5);
-        console.log(ampArr);
 
         imgOpts = ampArr[0].split('*', 2);
         leftOpts = ampArr[1].split('=', 2);
