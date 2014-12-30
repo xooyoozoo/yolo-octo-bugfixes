@@ -526,10 +526,25 @@ function getWindowsOptions() {
         var hashArr, ampArr, imgOpts, name, scale, leftOpts, rightOpts;
 
         hashArr = (location.hash).split('#', 3);
-        if (hashArr[1] && hashArr[1] == "psycomp") {
-            urlFolder = "psycomp/";
-            preparePsySelects();
-            prepareEncodeDesc();
+        if (hashArr[1]) {
+            if (hashArr[1] == "psycomp") {
+                urlFolder = "psycomp/";
+                preparePsyCompSelects();
+                prepareEncodeDesc("psycomp");
+            } else if (hashArr[1] == "addpsy") {
+                var psyOpt  = new Option("BPG-psy", "bpg");
+                psyOpt.setAttribute("folder", 'BPG-psy');
+                select.left.insertBefore(psyOpt.cloneNode(true),
+                                         select.left.firstChild);
+                select.right.insertBefore(psyOpt,
+                                         select.right.firstChild);
+                select.file.options[27].selected = true;
+                select.left.options[1].selected = true;
+                select.right.options[0].selected = true;
+                leftQual.options[1].selected = true;
+                rightQual.options[1].selected = true;
+                prepareEncodeDesc("addpsy");
+            }
         }
 
         ampArr = (hashArr.pop()+'&='+'&=').split('&', 5);
@@ -567,7 +582,7 @@ function getWindowsOptions() {
         };
     };
 
-    function preparePsySelects() {
+    function preparePsyCompSelects() {
         select.left.options.length = 0;
         leftQual.options[2].selected = true;
         leftQual.disabled = true;
@@ -582,33 +597,36 @@ function getWindowsOptions() {
         psy.setAttribute("folder", 'BPG-psy');
         select.right.appendChild(psy);
     }
-    function prepareEncodeDesc() {
-        var clis, encs, p, text;
+    function prepareEncodeDesc(comp) {
+        var clis, encs;
+
         clis = getElId("descCli");
-        clis.innerHTML = "";
-
-        p = document.createElement("p");
-        text = document.createTextNode("BPG-soft: bpgenc-0.9.4 -b 10 -m 9, with x265-1.4+226 --no-cutree --aq-mode 1 --crf");
-        p.appendChild(text);
-        clis.appendChild(p);
-
-        p = document.createElement("p");
-        text = document.createTextNode("BPG-psy: [...] --deblock -2:-2 --{cbqpoffs, crqpoffs} -1 --psy-rd 0.8 --psy-rdoq 2.4 --bitrate");
-        p.appendChild(text);
-        clis.appendChild(p);
-
         encs = getElId("descEnc");
-        encs.innerHTML = "";
 
-        p = document.createElement("p");
-        text = document.createTextNode("Soft 1st encoded to equivalent of 28 base QP. Psy matched to within +/- 5% filesize.");
-        p.appendChild(text);
-        encs.appendChild(p);
+        if (comp == "psycomp"){
+            clis.innerHTML = "";
+            encs.innerHTML = "";
 
-        p = document.createElement("p");
-        text = document.createTextNode("Press Shift to flip between individual encodes. Rescaling is through Lanczos2.");
-        p.appendChild(text);
-        encs.appendChild(p);
+            insertText(clis, "BPG-soft: bpgenc-0.9.4 -b 10 -m 9, with x265-1.4+226 --no-cutree --aq-mode 1 --crf");
+            insertText(clis, "BPG-psy: [...] --deblock -2:-2 --{cbqpoffs, crqpoffs} -1 --psy-rd 0.8 --psy-rdoq 2.4 --bitrate");
+
+            insertText(encs, "Soft 1st encoded to equivalent of 28 base QP. Psy matched to within +/- 5% filesize.");
+            insertText(encs, "Press Shift to flip between individual encodes. Rescaling is through Lanczos2.");
+        } else if (comp == "addpsy") {
+            insertText(clis, "bpgenc-0.9.4 -b 10 -m 9, with x265-1.4+228 --aq-mode 1 --psy-rd [0.25,0.5,0.75,1] --psy-rdoq [1,1.6,2.2,2.8] --deblock -2:-2 --{cbqpoffs, crqpoffs} -1",
+                clis.firstChild);
+        }
+    }
+    function insertText(el, text, pushedBackText) {
+        var p = document.createElement("p");
+        var textNode = document.createTextNode(String(text));
+
+        p.appendChild(textNode);
+        if (pushedBackText) {
+            el.insertBefore(p, pushedBackText)
+        } else {
+            el.appendChild(p);
+        }
     }
 }
 
